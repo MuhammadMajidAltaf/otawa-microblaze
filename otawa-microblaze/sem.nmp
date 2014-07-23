@@ -1,0 +1,642 @@
+canon s32 "_R"(u32) // Should this be signed?
+canon u32 "_IMMHIGH"
+canon bit "_CARRY"
+canon bit "_IMMHIGH_VALID"
+canon bit "_BRANCH_DELAYED"
+canon u32 "_PC"
+
+canon "_NOP"()
+canon "_BRANCH"(u32)
+canon "_TRAP"()
+canon "_CONT"()
+canon "_IF"(u32, u32, u32)
+canon "_LOAD"(u32, u32, u32)
+canon "_STORE"(u32, u32, u32)
+canon "_SCRATCH"(u32)
+canon "_SET"(u32, u32)
+canon "_SETI"(u32, s32)          // Set immediate?
+canon "_CMP"(u32, s32, s32)
+canon "_CMPU"(u32, u32, u32)
+canon "_ADD"(u32, u32, u32)
+canon "_SUB"(u32, u32, u32)
+canon "_SHL"(u32, u32, u32)
+canon "_SHR"(u32, u32, u32)
+canon "_ASR"(u32, u32, u32)
+canon "_NOT"(u32, u32)
+canon "_AND"(u32, u32, u32)
+canon "_OR"(u32, u32, u32)
+canon "_MUL"(s32, s32, s32)
+canon "_MULU"(u32, u32, u32)
+canon "_XOR"(u32, u32, u32)
+
+// condition codes
+canon u32 "_NO_COND"
+canon u32 "_EQ"
+canon u32 "_LT"
+canon u32 "_LE"
+canon u32 "_GE"
+canon u32 "_GT"
+canon u32 "_ANY_COND"
+canon u32 "_NE"
+canon u32 "_ULT"
+canon u32 "_ULE"
+canon u32 "_UGE"
+canon u32 "_UGT"
+
+// memory types
+canon u32 "_INT8"
+canon u32 "_INT16"
+canon u32 "_INT32"
+canon u32 "_UINT8"
+canon u32 "_UINT16"
+canon u32 "_UINT32"
+
+let IMMTMP = -1
+let T1 = -2        // Used for rA
+let T2 = -3        // Used for rB
+let T3 = -4        // Used for rD
+let T4 = -5        // Temporary in *I calls
+let T5 = -6        // Normally used for carry calculations
+
+macro NOP = "_NOP"()
+macro BRANCH(a) = "_BRANCH"(a)
+macro TRAP = "_TRAP"()
+macro CONT = "_CONT"()
+macro IF(c,s,j) = "_IF"(c,s,j)
+macro LOAD(d, addr, type) = "_LOAD"(d, addr, type)
+macro STORE(d, addr, type) = "_STORE"(d, addr, type)
+macro SCRATCH(d) = "_SCRATCH"(d)
+macro SET(d, s) = "_SET"(d, s)
+macro SETI(d, i) = "_SETI"(d, i)
+macro CMP(d, s1, s2) = "_CMP"(d, s1, s2)
+macro CMPU(d, s1, s2) = "_CMPU"(d, s1, s2)
+macro ADD(d, s1, s2) = "_ADD"(d, s1, s2)
+macro SUB(d, s1, s2) = "_SUB"(d, s1, s2)
+macro SHL(d, s1, s2) = "_SHL"(d, s1, s2)
+macro SHR(d, s1, s2) = "_SHR"(d, s1, s2)
+macro ASR(d, s1, s2) = "_ASR"(d, s1, s2)
+macro NOT(d, s) = "_NOT"(d, s)
+macro AND(d, s1, s2) = "_AND"(d, s1, s2)
+macro OR(d, s1, s2) = "_OR"(d, s1, s2)
+macro MUL(d, s1, s2) = "_MUL"(d, s1, s2)
+macro MULU(d, s1, s2) = "_MULU"(d, s1, s2)
+macro XOR(d, s1, s2) = "_XOR"(d, s1, s2)
+
+macro SHLI(d, s, i) = "_SETI"(T4, i); "_SHL"(d, s, T4)
+macro SHRI(d, s, i) = "_SETI"(T4, i); "_SHR"(d, s, T4)
+macro ASHRI(d, s, i) = "_SETI"(T4, i); "_ASR"(d, s, T4)
+macro ADDI(d, s, i) = "_SETI"(T4, i); "_ADD"(d, s, T4)
+macro SUBI(d, s, i) = "_SETI"(T4, i); "_SUB"(d, s, T4)
+macro ANDI(d, s, i) = "_SETI"(T4, i); "_AND"(d, s, T4)
+macro  ORI(d, s, i) = "_SETI"(T4, i);  "_OR"(d, s, T4)
+macro XORI(d, s, i) = "_SETI"(T4, i); "_XOR"(d, s, T4)
+
+// I'm not risking crosstalk from the files...
+macro IMMHIGH_OT = "_IMMHIGH"
+macro C_OT = "_CARRY"
+macro IMMHIGHVALID_OT = "_IMMHIGH_VALID"
+macro BRANCH_DELAYED = "_BRANCH_DELAYED"
+macro PC = "_PC"
+
+extend reg_idx
+	value = i
+
+extend reg_idx0
+	value = i
+
+// Poor planning on my behalf...
+macro GET_REG(d, r) = \
+    if r.is_zero then \
+	  SETI(d, 0); \
+	else \
+	  SET(d, "_R"(r.value)); \
+	endif
+
+macro BUILD_IMM(d, i) = \
+	SETI(d, i); \
+	IF("_EQ", IMMHIGHVALID_OT, 1); \
+	AND(d, d, IMMHIGH_OT); \
+	IF("_NE", IMMHIGHVALID_OT, 2); \
+	SHLI(d, d, 16); \
+	ASHRI(d, d, 16); \ 
+	SETI(IMMHIGHVALID_OT, 0)
+
+
+// Start extendin' stuff!
+// This is the first time I've done this. It'll be bad. Sorry.
+extend MBlaze_typeA_ALU
+	otawa_sem = 
+	{
+		if !rD.is_zero then
+			GET_REG(T1, rA);
+			GET_REG(T2, rB);
+
+			if rsub == 1 then
+				// RSUB = rD = rB - rA
+				SUB(T3, T2, T1);
+			else
+				ADD(T3, T1, T2);
+			endif;
+
+			if carry == 1 then
+				IF("_EQ", C_OT, 1); // If carry is zero, don't add
+				ADDI(T3, T3, 1);
+			endif;
+
+			SET("_R"(rD.value), T3);
+
+			if keep == 0 then
+				SETI(C_OT, 0);
+				
+				// Is the result smaller than the operands?
+				// Hacky...but...yeah...
+				SUB(T5, T3, T1);
+				IF("_LT", T5, 3);
+				SUB(T5, T3, T2);
+				IF("_LT", T5, 1);
+				CONT; // Stop processing
+				SETI(C_OT, 1);
+			endif;
+		endif;
+	}
+
+extend MBlaze_typeB_ALU
+	otawa_sem = 
+	{
+		if !rD.is_zero then
+			GET_REG(T1, rA);
+			BUILD_IMM(IMMTMP, imm);
+
+			if rsub == 1 then
+				SUB(T3, IMMTMP, T1);
+			else
+				ADD(T3, T1, IMMTMP);
+			endif;
+
+			if carry == 1 then
+				IF("_EQ", C_OT, 1); // If carry is zero, don't add
+				ADDI(T3, T3, 1);
+			endif;
+
+			SET("_R"(rD.value), T3);
+
+			if keep == 0 then
+				SETI(C_OT, 0);
+
+				SUB(T5, T3, T1);
+				IF("_LT", T5, 3);
+				SUB(T5, T3, IMMTMP);
+				IF("_LT", T5, 1);
+				CONT; // Stop processing
+				SETI(C_OT, 1);
+			endif;
+		endif;
+	}
+
+extend MBlaze_typeA_MUL
+	otawa_sem = 
+	{
+		GET_REG(T1, rA);
+		GET_REG(T2, rB);
+		switch(extra)
+		{
+			case 0: 
+				MUL(T3, T1, T2);
+			case 1: 
+				MUL(T3, T1, T2);
+				SHRI(T3, T3, 32);
+				SET("_R"(rD.value), T3);
+			case 3: 
+				MULU(T3, T1, T2);
+				SHRI(T3, T3, 32);
+				SET("_R"(rD.value), T3);
+			case 2:
+				// Er...this is wrong...
+				MUL(T3, T1, T2);
+				SHRI(T3, T3, 32);
+				SET("_R"(rD.value), T3);
+		};
+	}
+
+extend MBlaze_typeB_MUL
+	otawa_sem = 
+	{
+		if !rD.is_zero then
+			GET_REG(T1, rA);
+			BUILD_IMM(IMMTMP, imm);
+		
+			MUL(T3, T1, IMMTMP);
+			SET("_R"(rD.value), T3);
+		endif;
+	}
+
+extend MBlaze_typeA_BSL
+	otawa_sem = 
+	{
+		if !rD.is_zero then
+			GET_REG(T1, rA);
+			GET_REG(T2, rB);
+
+			if extra == 0 then
+				SHR(T3, T1, T2);
+			else
+				if extra<9..9> == 1 then
+					ASR(T3, T1, T2);
+				else
+					if extra<10..10> == 1 then
+						SHL(T3, T1, T2);
+					endif;
+				endif;
+			endif;
+
+			SET("_R"(rD.value), T3);
+		endif;
+	}
+
+extend MBlaze_typeA_GETPUTD
+	otawa_sem = 
+	{
+		//if !rD.is_zero then
+			//SCRATCH(T3);
+			//SET("_R"(rD.value), coerce(card(32), T3));
+		//endif;
+	}
+
+extend MBlaze_typeB_BSL
+	otawa_sem = 
+	{
+		if !rD.is_zero then
+			GET_REG(T1, rA);
+
+			if extra == 0 then
+				SHRI(T3, T1, imm);
+			else
+				if extra<4..4> == 1 then
+					ASHRI(T3, T1, imm);
+				else
+					if extra<5..5> == 1 then
+						SHLI(T3, T1, imm);
+					endif;
+				endif;
+			endif;
+
+			SET("_R"(rD.value), T3);
+		endif;
+	}
+
+extend MBlaze_typeB_GET
+	otawa_sem = 
+	{
+		if !rD.is_zero then
+			SCRATCH(T3);
+			SET(rD.value, T3);
+		endif;
+	}
+
+extend MBlaze_typeB_PUT
+	otawa_sem = 
+	{
+
+	}
+
+extend MBlaze_typeA_logic
+	otawa_sem = 
+	{
+		if !rD.is_zero then
+			GET_REG(T1, rA);
+			GET_REG(T2, rB);
+
+			switch(opc)
+			{
+				case 0: OR(T3, T1, T2);
+				case 1: AND(T3, T1, T2);
+				case 2: XOR(T3, T1, T2);
+				case 3: NOT(T3, T2); AND(T3, T1, T3);
+			};
+
+			SET("_R"(rD.value), T3);
+		endif;
+	}
+
+extend MBlaze_typeA_PCMP
+	otawa_sem = 
+	{
+		// Ignore the pattern comparator for now...
+		if !rD.is_zero then
+			SCRATCH(T3);
+			SET("_R"(rD.value), T3);
+		endif;
+	}
+
+extend MBlaze_typeB_UTIL
+	otawa_sem = 
+	{
+		if !rD.is_zero then
+			GET_REG(T1, rA);
+			switch(imm)
+			{
+				case 0x0001:
+					ASHRI(T3, T1, 1);
+					SETI(C_OT, 0);
+					ANDI(T5, T1, 0x80000000);
+
+					IF("_EQ", T5, 1);
+					SETI(C_OT, 1);
+				case 0x0021: 
+					SHRI(T3, T1, 1);
+
+					IF("_EQ", C_OT, 1);
+					ANDI(T3, T3, 0x80000000);
+
+					SETI(C_OT, 0);
+					ANDI(T5, T1, 0x80000000);
+
+					IF("_EQ", T5, 1);
+					SETI(C_OT, 1);
+				case 0x0041: 
+					ASHRI(T3, T1, 1);
+					SETI(C_OT, 0);
+					ANDI(T5, T1, 0x80000000);
+
+					IF("_EQ", T5, 1);
+					SETI(C_OT, 1);
+				case 0x0060: 
+					SHLI(T3, T1, 24);
+					ASHRI(T3, T3, 24);
+				case 0x0061: 
+					SHLI(T3, T1, 16);
+					ASHRI(T3, T3, 16);
+				case 0x00E0:
+					SCRATCH(T3);
+				case 0x01E0: 
+					SCRATCH(T3);
+				case 0x01E2: 
+					SCRATCH(T3);
+			};
+
+			SET("_R"(rD.value), T3);
+		endif;
+	}
+
+extend MBlaze_typeB_MTS
+	otawa_sem = 
+	{
+
+	}
+
+extend MBlaze_typeB_MFS
+	otawa_sem = 
+	{
+
+	}
+
+extend MBlaze_typeA_BR
+	otawa_sem = 
+	{
+		GET_REG(T1, rB);
+		if linked == 1 && !rD.is_zero then
+			SET("_R"(rD.value), PC);
+		endif;
+
+		if delayed == 1 then
+			SETI(BRANCH_DELAYED, 1);
+		else
+			SETI(BRANCH_DELAYED, 0);
+		endif;
+
+		if abs == 1 then
+			BRANCH(T1);
+		else
+			ADD(T3, T1, PC);
+			BRANCH(T3);
+		endif;
+	}
+
+extend MBlaze_typeA_BRC
+	otawa_sem = 
+	{
+		GET_REG(T1, rA);
+		GET_REG(T2, rB);
+
+		SETI(T5, 1);
+		switch(cond)
+		{
+			case 0: 
+				IF("_EQ", T1, 1);
+				SETI(T5, 0);
+			case 1:
+				IF("_NE", T1, 1);
+				SETI(T5, 0);
+			case 2:
+				IF("_LT", T1, 1);
+				SETI(T5, 0);
+			case 3:
+				IF("_LE", T1, 1);
+				SETI(T5, 0);
+			case 4:
+				IF("_GT", T1, 1);
+				SETI(T5, 0);
+			case 5:
+				IF("_GE", T1, 1);
+				SETI(T5, 0);
+		};
+
+		IF("_NE", T5, 1);
+		CONT;
+
+		if delayed == 1 then
+			SETI(BRANCH_DELAYED, 1);
+		else
+			SETI(BRANCH_DELAYED, 0);
+		endif;
+
+		ADDI(T3, T2, PC);
+		BRANCH(T3);
+	}
+
+extend MBlaze_typeB_logic
+	otawa_sem = 
+	{
+		if !rD.is_zero then
+			GET_REG(T1, rA);
+			BUILD_IMM(IMMTMP, imm);
+
+			switch(opc)
+			{
+				case 0: OR(T3, T1, IMMTMP);
+				case 1: AND(T3, T1, IMMTMP);
+				case 2: XOR(T3, T1, IMMTMP);
+				case 3: NOT(T3, IMMTMP); AND(T3, T1, T3);
+			};
+
+			SET("_R"(rD.value), T3);
+		endif;
+	}
+
+extend MBlaze_typeB_IMM
+	otawa_sem = 
+	{
+		SETI(IMMHIGHVALID_OT, 1);
+		SETI(IMMHIGH_OT, imm);
+		SHLI(IMMHIGH_OT, IMMHIGH_OT, 16);
+	}
+
+extend MBlaze_typeB_RET
+	otawa_sem = 
+	{
+		SET(BRANCH_DELAYED, 1);
+		BUILD_IMM(IMMTMP, imm);
+		GET_REG(T1, rA);
+		ADD(T3, T1, IMMTMP);
+		BRANCH(T3);
+	}
+
+extend MBlaze_typeB_BR
+	otawa_sem = 
+	{
+		BUILD_IMM(IMMTMP, imm);
+		if linked == 1 && !rD.is_zero then
+			SET("_R"(rD.value), PC);
+		endif;
+
+		if delayed == 1 then
+			SETI(BRANCH_DELAYED, 1);
+		else
+			SETI(BRANCH_DELAYED, 0);
+		endif;
+
+		if abs == 1 then
+			BRANCH(IMMTMP);
+		else
+			ADD(T3, IMMTMP, PC);
+			BRANCH(T3);
+		endif;
+	}
+
+extend MBlaze_typeB_BRC
+	otawa_sem = 
+	{
+		GET_REG(T1, rA);
+		BUILD_IMM(IMMTMP, imm);
+
+		SETI(T5, 1);
+		switch(cond)
+		{
+			case 0: 
+				IF("_EQ", T1, 1);
+				SETI(T5, 0);
+			case 1:
+				IF("_NE", T1, 1);
+				SETI(T5, 0);
+			case 2:
+				IF("_LT", T1, 1);
+				SETI(T5, 0);
+			case 3:
+				IF("_LE", T1, 1);
+				SETI(T5, 0);
+			case 4:
+				IF("_GT", T1, 1);
+				SETI(T5, 0);
+			case 5:
+				IF("_GE", T1, 1);
+				SETI(T5, 0);
+		};
+
+		IF("_NE", T5, 1);
+		CONT;
+
+		if delayed == 1 then
+			SETI(BRANCH_DELAYED, 1);
+		else
+			SETI(BRANCH_DELAYED, 0);
+		endif;
+
+		ADDI(T3, IMMTMP, PC);
+		BRANCH(T3);
+	}
+
+extend MBlaze_typeA_LD
+	otawa_sem = 
+	{
+		GET_REG(T1, rA);
+		GET_REG(T2, rB);
+		ADD(T4, T1, T2);
+
+		if half == 0 && word == 0 then // Byte load
+			LOAD(T3, T4, "_UINT8");
+		else
+			if half == 1 then
+				LOAD(T3, T4, "_UINT16");
+			else
+				if word == 1 then
+					LOAD(T3, T4, "_UINT32");
+				endif;
+			endif;
+		endif;
+
+		SET("_R"(rD.value), T3);
+	}
+
+extend MBlaze_typeA_ST
+	otawa_sem = 
+	{
+		GET_REG(T1, rA);
+		GET_REG(T2, rB);
+		GET_REG(T3, rD);
+		ADD(T4, T1, T2);
+
+		if half == 0 && word == 0 then // Byte load
+			STORE(T4, T3, "_UINT8");
+		else
+			if half == 1 then
+				STORE(T4, T3, "_UINT16");
+			else
+				if word == 1 then
+					STORE(T4, T3, "_UINT32");
+				endif;
+			endif;
+		endif;
+	}
+
+extend MBlaze_typeB_LDI
+	otawa_sem = 
+	{
+		GET_REG(T1, rA);
+		BUILD_IMM(IMMTMP, imm);
+		ADD(T4, T1, IMMTMP);
+
+		if half == 0 && word == 0 then // Byte load
+			LOAD(T3, T4, "_UINT8");
+		else
+			if half == 1 then
+				LOAD(T3, T4, "_UINT16");
+			else
+				if word == 1 then
+					LOAD(T3, T4, "_UINT32");
+				endif;
+			endif;
+		endif;
+
+		SET("_R"(rD.value), T3);
+	}
+
+extend MBlaze_typeB_STI
+	otawa_sem = 
+	{
+		GET_REG(T1, rA);
+		BUILD_IMM(IMMTMP, imm);
+		GET_REG(T3, rD);
+		ADD(T4, T1, IMMTMP);
+
+		if half == 0 && word == 0 then // Byte load
+			STORE(T4, T3, "_UINT8");
+		else
+			if half == 1 then
+				STORE(T4, T3, "_UINT16");
+			else
+				if word == 1 then
+					STORE(T4, T3, "_UINT32");
+				endif;
+			endif;
+		endif;
+	}

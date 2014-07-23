@@ -1,0 +1,5 @@
+let DELAYED_NONE = 0
+let DELAYED_YES = 1
+
+extend MBlaze_typeA_BRC, MBlaze_typeA_BR, MBlaze_typeB_BRC, MBlaze_typeB_BR
+	otawa_delayed = if delayed then DELAYED_YES else DELAYED_NONE endif

@@ -1,0 +1,93 @@
+let NO_KIND	= 0x00000000
+let IS_COND	= 0x00000001
+let IS_CONTROL	= 0x00000002
+let IS_CALL	= 0x00000004	// save PC before branching
+let IS_RETURN	= 0x00000008
+let IS_MEM	= 0x00000010
+let IS_LOAD	= 0x00000020
+let IS_STORE	= 0x00000040
+let IS_INT	= 0x00000080
+let IS_FLOAT	= 0x00000100
+let IS_ALU	= 0x00000200	// basic arithmetic operations (like "+", "-")
+let IS_MUL	= 0x00000400
+let IS_DIV	= 0x00000800
+let IS_SHIFT	= 0x00001000
+let IS_TRAP	= 0x00002000
+let IS_SPECIAL	= 0x00010000
+
+let IS_DELAYED  = 0x01000000
+
+extend MBlaze_typeA_ALU
+	otawa_kind = IS_INT | IS_ALU
+
+extend MBlaze_typeB_ALU
+	otawa_kind = IS_INT | IS_ALU
+
+extend MBlaze_typeA_MUL
+	otawa_kind = IS_INT | IS_MUL
+
+extend MBlaze_typeB_MUL
+	otawa_kind = IS_INT | IS_MUL
+
+extend MBlaze_typeA_BSL
+	otawa_kind = IS_INT | IS_ALU | IS_SHIFT
+
+extend MBlaze_typeA_GETPUTD
+	otawa_kind = IS_SPECIAL
+
+extend MBlaze_typeB_BSL
+	otawa_kind = IS_INT | IS_ALU | IS_SHIFT
+
+extend MBlaze_typeB_GET
+	otawa_kind = IS_SPECIAL
+
+extend MBlaze_typeB_PUT
+	otawa_kind = IS_SPECIAL
+
+extend MBlaze_typeA_logic
+	otawa_kind = IS_INT | IS_ALU
+
+extend MBlaze_typeA_PCMP
+	otawa_kind = IS_SPECIAL
+
+extend MBlaze_typeB_UTIL
+	otawa_kind = IS_INT | IS_ALU
+
+extend MBlaze_typeB_MTS
+	otawa_kind = IS_SPECIAL
+
+extend MBlaze_typeB_MFS
+	otawa_kind = IS_SPECIAL
+
+extend MBlaze_typeA_BR
+	otawa_kind = IS_CONTROL | if delayed == 1 then IS_DELAYED else NO_KIND endif | if linked == 1 then IS_CALL else NO_KIND endif
+
+extend MBlaze_typeA_BRC
+	otawa_kind = IS_CONTROL | IS_COND | if delayed == 1 then IS_DELAYED else NO_KIND endif
+
+extend MBlaze_typeB_logic
+	otawa_kind = IS_ALU | IS_INT
+
+extend MBlaze_typeB_IMM
+	otawa_kind = IS_ALU | IS_INT
+
+extend MBlaze_typeB_RET
+	otawa_kind = IS_RETURN | IS_CONTROL
+
+extend MBlaze_typeB_BR
+	otawa_kind = IS_CONTROL | if delayed == 1 then IS_DELAYED else NO_KIND endif | if linked == 1 then IS_CALL else NO_KIND endif
+
+extend MBlaze_typeB_BRC
+	otawa_kind = IS_CONTROL | IS_COND | if delayed == 1 then IS_DELAYED else NO_KIND endif
+
+extend MBlaze_typeA_LD
+	otawa_kind = IS_MEM | IS_LOAD
+
+extend MBlaze_typeA_ST
+	otawa_kind = IS_MEM | IS_STORE
+
+extend MBlaze_typeB_LDI
+	otawa_kind = IS_MEM | IS_LOAD
+
+extend MBlaze_typeB_STI
+	otawa_kind = IS_MEM | IS_STORE

@@ -1,0 +1,15 @@
+// identify a dynamic target which is only known at runtime,
+// same as default value for the otawa_target attr for a non branch instruction
+let TARGET_UNKNOWN = 0
+
+extend MBlaze_typeA_BR
+	otawa_target = TARGET_UNKNOWN
+
+extend MBlaze_typeA_BRC
+	otawa_target = TARGET_UNKNOWN
+
+extend MBlaze_typeB_BR
+	otawa_target = if abs == 1 then coerce(int(32), imm) else coerce(int(32), imm) + __IADDR endif
+
+extend MBlaze_typeB_BR
+	otawa_target = coerce(int(32), imm) + __IADDR
