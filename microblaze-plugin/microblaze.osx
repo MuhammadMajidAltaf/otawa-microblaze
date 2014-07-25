@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<otawa-script
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+    <info>
+    	<h1>Microblaze</h1>
+    	<h2>Description</h2>
+    	<p>
+    		This is an OTAWA implementation for Microblaze. More information can be
+    		found at Xilinx's site at <a href="http://www.xilinx.com/tools/microblaze.htm">http://www.xilinx.com/tools/microblaze.htm</a>
+    	</p>
+
+    	<h2>Progress</h2>
+    	<ul>
+    		<li>Er...yeah...</li>
+    	</ul>
+    </info>
+
+    <id>
+    	<arch>microblaze</arch>
+    	<abi>eabi</abi>
+    	<mach>microblaze</mach>
+    </id>
+
+    <configuration>
+    	<!-- No configuration yet... -->
+    </configuration>
+
+    <platform>
+    	<xi:include href="microblaze/pipeline.xml" />
+    	<xi:include href="microblaze/memory.xml" />
+    </platform>
+
+    <script>
+        <step processor="otawa::DelayedBuilder"/>
+    	<step require="otawa::DELAYED_CFG_FEATURE"/>
+		<step processor="otawa::microblaze::BBTimer">
+			<config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="out"/>
+		</step>
+
+		<!-- WCET computation -->
+		<step require="otawa::ipet::WCET_FEATURE"/>
+
+		<step processor="otawa::ipet::WCETCountRecorder"/>
+		<step processor="otawa::display::CFGOutput">
+			<!--config name="otawa::display::CFGOutput::PATH" value="wcet.txt"/-->
+		</step>
+    </script>
+
+</otawa-script>

@@ -1,5 +1,5 @@
 /*
- *	Patmos loader header file
+ *	Microblaze loader header file
  */
 #ifndef OTAWA_MICROBLAZE_H
 #define OTAWA_MICROBLAZE_H

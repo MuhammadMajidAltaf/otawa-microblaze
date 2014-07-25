@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<processor class="otawa::hard::Processor">
+	<arch>microblaze</arch>
+	<model>microblaze</model>
+
+	<stages>
+		<stage name="IF">
+			<name>IF</name>
+			<width>1</width>
+			<type>FETCH</type>
+		</stage>
+
+		<stage id="OF">
+			<name>OF</name>
+			<width>1</width>
+			<type>LAZY</type>
+		</stage>
+
+		<stage id="EX">
+			<name>EX</name>
+			<width>1</width>
+			<type>EXEC</type>
+
+			<fus>
+				<fu id="ALU">
+					<name>ALU</name>
+					<width>1</width>
+					<latency>1</latency>
+				</fu>
+			</fus>
+
+			<dispatch>
+				<inst>
+					<type />
+					<fu ref="ALU" />
+				</inst>
+			</dispatch>
+		</stage>
+
+		<stage id="MEM">
+			<name>MEM</name>
+			<width>1</width>
+			<type>LAZY</type>
+		</stage>
+
+		<stage id="WB">
+			<name>WB</name>
+			<width>1</width>
+			<type>COMMIT</type>
+		</stage>
+	</stages>
+</processor>

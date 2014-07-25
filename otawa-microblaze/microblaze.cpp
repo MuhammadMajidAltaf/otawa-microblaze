@@ -60,15 +60,17 @@ static hard::Register  regPC ("PC",  hard::Register::ADDR, 32);
 static hard::Register  regNPC("nPC", hard::Register::ADDR, 32);
 
 static hard::Register  regImmHigh("IMMHIGH", hard::Register::INT, 32);
-static hard::Register  regCarry("CARRY", hard::Register::BITS, 1);
-static hard::Register  regImmHighValid("IMMHIGHVALID", hard::Register::BITS, 1);
-static hard::Register  regBranchDelayed("BRANCHDELAYED", hard::Register::BITS, 1);
+static hard::Register  regCarry("CARRY", hard::Register::INT, 1);
+static hard::Register  regImmHighValid("IMMHIGHVALID", hard::Register::INT, 1);
+static hard::Register  regBranchDelayed("BRANCHDELAYED", hard::Register::INT, 1);
 
-static hard::MeltedBank misc("misc", &regImmHigh, &regCarry, &regImmHighValid, &regBranchDelayed, &regPC, &regNPC, 0);
+static hard::MeltedBank misc1("misc1", &regPC, &regNPC, &regImmHigh, &regCarry, 0);
+static hard::MeltedBank misc2("misc2", &regImmHighValid, &regBranchDelayed, 0);
 
 static const hard::RegBank *banks[] = {
         &regR,
-        &misc,
+        &misc1,
+        &misc2,
 };
 
 static const elm::genstruct::Table<const hard::RegBank *> banks_table(banks, 2);
@@ -162,7 +164,7 @@ public:
 		return 0;
 	}
 
-	virtual int instSize(void) const { return 0; }
+	virtual int instSize(void) const { return 4; }
 
 	void decodeRegs( Inst *inst, elm::genstruct::AllocatedTable<hard::Register *> *in, elm::genstruct::AllocatedTable<hard::Register *> *out);
 
@@ -673,9 +675,15 @@ otawa::Inst *Process::decode(Address addr) {
 	// build the object
 	ot::size size = microblaze_get_inst_size(inst) / 8;
 	if (is_branch)
+	{
+		//elm::cout << "BRANCH!\n";
 		result = new BranchInst(*this, kind, addr, size);
+	}
 	else
+	{
+		//elm::cout << "NOT BRANCH\n";
 		result = new Inst(*this, kind, addr, size);
+	}
 
 	// cleanup
 	ASSERT(result);
@@ -689,7 +697,7 @@ microblaze_address_t BranchInst::decodeTargetAddress(void) {
 
 	// Decode the instruction
 	microblaze_inst_t *inst;
-	TRACE("ADDR " << addr);
+
 	inst = microblaze_decode(proc.microblazeDecoder(), (microblaze_address_t)address());
 
 	// retrieve the target addr from the nmp otawa_target attribute

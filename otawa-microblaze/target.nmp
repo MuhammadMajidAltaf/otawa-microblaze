@@ -11,5 +11,5 @@ extend MBlaze_typeA_BRC
 extend MBlaze_typeB_BR
 	otawa_target = if abs == 1 then coerce(int(32), imm) else coerce(int(32), imm) + __IADDR endif
 
-extend MBlaze_typeB_BR
+extend MBlaze_typeB_BRC
 	otawa_target = coerce(int(32), imm) + __IADDR
