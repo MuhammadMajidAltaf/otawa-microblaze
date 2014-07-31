@@ -68,9 +68,6 @@ extend MBlaze_typeA_BRC
 extend MBlaze_typeB_logic
 	otawa_kind = IS_ALU | IS_INT
 
-extend MBlaze_typeB_IMM
-	otawa_kind = IS_ALU | IS_INT
-
 extend MBlaze_typeB_RET
 	otawa_kind = IS_RETURN | IS_CONTROL
 

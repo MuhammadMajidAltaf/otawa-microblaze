@@ -1,7 +1,5 @@
 canon s32 "_R"(u32) // Should this be signed?
-canon u32 "_IMMHIGH"
 canon bit "_CARRY"
-canon bit "_IMMHIGH_VALID"
 canon bit "_BRANCH_DELAYED"
 canon u32 "_PC"
 
@@ -112,15 +110,23 @@ macro GET_REG(d, r) = \
 	  SET(d, "_R"(r.value)); \
 	endif
 
-macro BUILD_IMM(d, i) = \
-	SETI(d, i); \
-	IF("_EQ", IMMHIGHVALID_OT, 1); \
-	AND(d, d, IMMHIGH_OT); \
-	IF("_NE", IMMHIGHVALID_OT, 2); \
-	SHLI(d, d, 16); \
-	ASHRI(d, d, 16); \ 
-	SETI(IMMHIGHVALID_OT, 0)
+extend MBlaze_typeB_extended
+	otawa_sem = 
+	{
+		SETI(IMMTMP, immHigh);
+		SHLI(IMMTMP, IMMTMP, 16);
+		ORI(IMMTMP, IMMTMP, immLow);
+		operation.otawa_sem;
+	}
 
+extend MBlaze_typeB_notextended
+	otawa_sem = 
+	{
+		SETI(IMMTMP, imm);
+		SHLI(IMMTMP, IMMTMP, 16);
+		ASHRI(IMMTMP, IMMTMP, 16);
+		operation.otawa_sem;
+	}
 
 // Start extendin' stuff!
 // This is the first time I've done this. It'll be bad. Sorry.
@@ -165,7 +171,6 @@ extend MBlaze_typeB_ALU
 	{
 		if !rD.is_zero then
 			GET_REG(T1, rA);
-			BUILD_IMM(IMMTMP, imm);
 
 			if rsub == 1 then
 				SUB(T3, IMMTMP, T1);
@@ -223,7 +228,6 @@ extend MBlaze_typeB_MUL
 	{
 		if !rD.is_zero then
 			GET_REG(T1, rA);
-			BUILD_IMM(IMMTMP, imm);
 		
 			MUL(T3, T1, IMMTMP);
 			SET("_R"(rD.value), T3);
@@ -459,7 +463,6 @@ extend MBlaze_typeB_logic
 	{
 		if !rD.is_zero then
 			GET_REG(T1, rA);
-			BUILD_IMM(IMMTMP, imm);
 
 			switch(opc)
 			{
@@ -473,19 +476,10 @@ extend MBlaze_typeB_logic
 		endif;
 	}
 
-extend MBlaze_typeB_IMM
-	otawa_sem = 
-	{
-		SETI(IMMHIGHVALID_OT, 1);
-		SETI(IMMHIGH_OT, imm);
-		SHLI(IMMHIGH_OT, IMMHIGH_OT, 16);
-	}
-
 extend MBlaze_typeB_RET
 	otawa_sem = 
 	{
 		SET(BRANCH_DELAYED, 1);
-		BUILD_IMM(IMMTMP, imm);
 		GET_REG(T1, rA);
 		ADD(T3, T1, IMMTMP);
 		BRANCH(T3);
@@ -494,7 +488,6 @@ extend MBlaze_typeB_RET
 extend MBlaze_typeB_BR
 	otawa_sem = 
 	{
-		BUILD_IMM(IMMTMP, imm);
 		if linked == 1 && !rD.is_zero then
 			SET("_R"(rD.value), PC);
 		endif;
@@ -517,7 +510,6 @@ extend MBlaze_typeB_BRC
 	otawa_sem = 
 	{
 		GET_REG(T1, rA);
-		BUILD_IMM(IMMTMP, imm);
 
 		SETI(T5, 1);
 		switch(cond)
@@ -602,7 +594,6 @@ extend MBlaze_typeB_LDI
 	otawa_sem = 
 	{
 		GET_REG(T1, rA);
-		BUILD_IMM(IMMTMP, imm);
 		ADD(T4, T1, IMMTMP);
 
 		if half == 0 && word == 0 then // Byte load
@@ -624,7 +615,6 @@ extend MBlaze_typeB_STI
 	otawa_sem = 
 	{
 		GET_REG(T1, rA);
-		BUILD_IMM(IMMTMP, imm);
 		GET_REG(T3, rD);
 		ADD(T4, T1, IMMTMP);
 

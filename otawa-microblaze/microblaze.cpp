@@ -59,21 +59,17 @@ static hard::PlainBank regR("D", hard::Register::INT,  32, "$r%d", 32);
 static hard::Register  regPC ("PC",  hard::Register::ADDR, 32);
 static hard::Register  regNPC("nPC", hard::Register::ADDR, 32);
 
-static hard::Register  regImmHigh("IMMHIGH", hard::Register::INT, 32);
 static hard::Register  regCarry("CARRY", hard::Register::INT, 1);
-static hard::Register  regImmHighValid("IMMHIGHVALID", hard::Register::INT, 1);
 static hard::Register  regBranchDelayed("BRANCHDELAYED", hard::Register::INT, 1);
 
-        static const hard::MeltedBank misc1("misc1", 4, &regPC, &regNPC, &regImmHigh, &regCarry, 0);
-        static const hard::MeltedBank misc2("misc2", 2, &regImmHighValid, &regBranchDelayed, 0);
+static const hard::MeltedBank misc1("misc1", 4, &regPC, &regNPC, &regCarry, &regBranchDelayed, 0);
 
 static const hard::RegBank *banks[] = {
         &regR,
         &misc1,
-        &misc2,
 };
 
-static const elm::genstruct::Table<const hard::RegBank *> banks_table(banks, 3);
+static const elm::genstruct::Table<const hard::RegBank *> banks_table(banks, 2);
 
 
 // register decoding
@@ -90,9 +86,7 @@ public:
             map[MICROBLAZE_REG_R(i)] = regR[i];
 		}
 
-		map[MICROBLAZE_REG_IMMHIGH] = &regImmHigh;
 		map[MICROBLAZE_REG_C] = &regCarry;
-		map[MICROBLAZE_REG_IMMHIGHVALID] = &regImmHighValid;
 		map[MICROBLAZE_REG_DB] = &regBranchDelayed;
 		map[MICROBLAZE_REG_PC] = &regPC;
 		map[MICROBLAZE_REG_NPC] = &regNPC;
@@ -861,9 +855,7 @@ Feature<NoProcessor> INFO_FEATURE("otawa::microblaze::INFO_FEATURE");
 #define _UINT64			otawa::sem::UINT64
 // Semantics information - Microblaze bindings
 #define _R(n)			otawa::microblaze::regR[n]->platformNumber()
-#define _IMMHIGH        otawa::microblaze::regImmHigh.platformNumber()
 #define _CARRY          otawa::microblaze::regCarry.platformNumber()
-#define _IMMHIGH_VALID  otawa::microblaze::regImmHighValid.platformNumber()
 #define _BRANCH_DELAYED otawa::microblaze::regBranchDelayed.platformNumber()
 #define _PC             otawa::microblaze::regPC.platformNumber()
 #include "otawa_sem.h"
