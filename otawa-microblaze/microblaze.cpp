@@ -64,8 +64,8 @@ static hard::Register  regCarry("CARRY", hard::Register::INT, 1);
 static hard::Register  regImmHighValid("IMMHIGHVALID", hard::Register::INT, 1);
 static hard::Register  regBranchDelayed("BRANCHDELAYED", hard::Register::INT, 1);
 
-static hard::MeltedBank misc1("misc1", &regPC, &regNPC, &regImmHigh, &regCarry, 0);
-static hard::MeltedBank misc2("misc2", &regImmHighValid, &regBranchDelayed, 0);
+        static const hard::MeltedBank misc1("misc1", 4, &regPC, &regNPC, &regImmHigh, &regCarry, 0);
+        static const hard::MeltedBank misc2("misc2", 2, &regImmHighValid, &regBranchDelayed, 0);
 
 static const hard::RegBank *banks[] = {
         &regR,
@@ -73,7 +73,7 @@ static const hard::RegBank *banks[] = {
         &misc2,
 };
 
-static const elm::genstruct::Table<const hard::RegBank *> banks_table(banks, 2);
+static const elm::genstruct::Table<const hard::RegBank *> banks_table(banks, 3);
 
 
 // register decoding

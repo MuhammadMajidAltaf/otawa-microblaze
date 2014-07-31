@@ -41,7 +41,7 @@ static ParExeNode* findMemoryStage(ParExeInst* instruction)
 {
 	for(ParExeGraph::InstNodeIterator node(instruction); node; node++)
 	{
-		elm::cout << node->stage()->index() << elm::io::endl;
+//		elm::cout << node->stage()->index() << elm::io::endl;
 		if(node->stage()->name() == "MEM")
 			return node;
 	}

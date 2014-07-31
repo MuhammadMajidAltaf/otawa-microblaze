@@ -30,11 +30,31 @@
     <platform>
     	<xi:include href="microblaze/pipeline.xml" />
     	<xi:include href="microblaze/memory.xml" />
+        
+        <cache-config>
+          <icache>
+            <block_bits>4</block_bits>
+            <way_bits>0</way_bits>
+            <set_bits>9</set_bits>
+          </icache>
+
+          <!--<dcache>
+            <block_bits>4</block_bits>
+            <way_bits>0</way_bits>
+            <set_bits>9</set_bits>
+          </dcache>-->
+        </cache-config>
     </platform>
 
     <script>
+        <step processor="otawa::Virtualizer" />
         <step processor="otawa::DelayedBuilder"/>
     	<step require="otawa::DELAYED_CFG_FEATURE"/>
+        
+        <!--<step require="otawa::ICACHE_CATEGORY_FEATURE" />-->
+        <step require="otawa::ICACHE_CATEGORY2_FEATURE" />
+        <!--<step require="otawa::COLLECTED_LBLOCKS_FEATURE" />-->
+
 		<step processor="otawa::microblaze::BBTimer">
 			<config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="out"/>
 		</step>

@@ -53,7 +53,7 @@ include_directories("${CMAKE_SOURCE_DIR}" ".")
 add_library(${SCRIPT} SHARED ${SOURCES})
 set_property(TARGET ${SCRIPT} PROPERTY PREFIX "")
 set_property(TARGET ${SCRIPT} PROPERTY COMPILE_FLAGS "${OTAWA_CFLAGS}")
-target_link_libraries(${SCRIPT} "${OTAWA_LDFLAGS} ${CMAKE_SOURCE_DIR}/../otawa-microblaze/build/microblaze.so")
+target_link_libraries(${SCRIPT} "${OTAWA_LDFLAGS} ${CMAKE_SOURCE_DIR}/../otawa-microblaze/microblaze.so")
 
 # installation
 if(NOT PREFIX)
