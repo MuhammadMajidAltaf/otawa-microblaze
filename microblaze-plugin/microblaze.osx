@@ -55,6 +55,8 @@
         <step require="otawa::ICACHE_CATEGORY2_FEATURE" />
         <!--<step require="otawa::COLLECTED_LBLOCKS_FEATURE" />-->
 
+        <step require="otawa::STACK_ANALYSIS_FEATURE" />
+
 		<step processor="otawa::microblaze::BBTimer">
 			<config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="out"/>
 		</step>

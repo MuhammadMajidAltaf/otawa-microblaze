@@ -578,13 +578,13 @@ extend MBlaze_typeA_ST
 		ADD(T4, T1, T2);
 
 		if half == 0 && word == 0 then // Byte load
-			STORE(T4, T3, "_UINT8");
+			STORE(T3, T4, "_UINT8");
 		else
 			if half == 1 then
-				STORE(T4, T3, "_UINT16");
+				STORE(T3, T4, "_UINT16");
 			else
 				if word == 1 then
-					STORE(T4, T3, "_UINT32");
+					STORE(T3, T4, "_UINT32");
 				endif;
 			endif;
 		endif;
@@ -619,13 +619,13 @@ extend MBlaze_typeB_STI
 		ADD(T4, T1, IMMTMP);
 
 		if half == 0 && word == 0 then // Byte load
-			STORE(T4, T3, "_UINT8");
+			STORE(T3, T4, "_UINT8");
 		else
 			if half == 1 then
-				STORE(T4, T3, "_UINT16");
+				STORE(T3, T4, "_UINT16");
 			else
 				if word == 1 then
-					STORE(T4, T3, "_UINT32");
+					STORE(T3, T4, "_UINT32");
 				endif;
 			endif;
 		endif;

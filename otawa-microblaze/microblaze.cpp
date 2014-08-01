@@ -123,6 +123,11 @@ public:
         // otawa::Platform overload
         virtual bool accept(const Identification& id)
                 { return id.abi() == "eabi" && id.architecture() == "microblaze"; }
+
+        virtual const Register* getSP() const
+       	{
+       		return regR[1];
+       	}
 };
 
 /**
