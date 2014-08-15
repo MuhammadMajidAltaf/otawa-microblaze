@@ -36,13 +36,17 @@
             <block_bits>4</block_bits>
             <way_bits>0</way_bits>
             <set_bits>9</set_bits>
+            <access_time>2000</access_time>
+            <miss_penalty>1000</miss_penalty>
           </icache>
 
-          <!--<dcache>
+          <dcache>
             <block_bits>4</block_bits>
             <way_bits>0</way_bits>
             <set_bits>9</set_bits>
-          </dcache>-->
+            <access_time>2000</access_time>
+            <miss_penalty>1000</miss_penalty>
+          </dcache>
         </cache-config>
     </platform>
 
@@ -53,21 +57,28 @@
         
         <!--<step require="otawa::ICACHE_CATEGORY_FEATURE" />-->
         <step require="otawa::ICACHE_CATEGORY2_FEATURE" />
-        <!--<step require="otawa::COLLECTED_LBLOCKS_FEATURE" />-->
+        <step require="otawa::COLLECTED_LBLOCKS_FEATURE" />
 
         <step require="otawa::STACK_ANALYSIS_FEATURE" />
+        
+        <!--step require="otawa::dcache::CATEGORY_FEATURE" /-->
 
-		<step processor="otawa::microblaze::BBTimer">
-			<config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="out"/>
-		</step>
+        <!--<step processor="otawa::microblaze::PrefetcherPass" />-->
+        <!--<step require="otawa::clp::FEATURE" />-->
+        <step processor="otawa::microblaze::BBTimer">
+          <config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="out"/>
+        </step>
 
-		<!-- WCET computation -->
-		<step require="otawa::ipet::WCET_FEATURE"/>
-
-		<step processor="otawa::ipet::WCETCountRecorder"/>
-		<step processor="otawa::display::CFGOutput">
-			<!--config name="otawa::display::CFGOutput::PATH" value="wcet.txt"/-->
-		</step>
+        <step processor="otawa::ipet::CachePenaltiesObjectFunctionBuilder"/>
+        <!---->
+        
+        <!-- WCET computation -->
+        <step require="otawa::ipet::WCET_FEATURE"/>
+        
+        <step processor="otawa::ipet::WCETCountRecorder"/>
+        <step processor="otawa::display::CFGOutput">
+          <config name="otawa::display::CFGOutput::PATH" value="cfgout"/>
+        </step>
     </script>
 
 </otawa-script>

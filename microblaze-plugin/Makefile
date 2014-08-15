@@ -173,6 +173,54 @@ BBTimer.cpp.s:
 	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/BBTimer.cpp.s
 .PHONY : BBTimer.cpp.s
 
+LoopStride.o: LoopStride.cpp.o
+.PHONY : LoopStride.o
+
+# target to build an object file
+LoopStride.cpp.o:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/LoopStride.cpp.o
+.PHONY : LoopStride.cpp.o
+
+LoopStride.i: LoopStride.cpp.i
+.PHONY : LoopStride.i
+
+# target to preprocess a source file
+LoopStride.cpp.i:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/LoopStride.cpp.i
+.PHONY : LoopStride.cpp.i
+
+LoopStride.s: LoopStride.cpp.s
+.PHONY : LoopStride.s
+
+# target to generate assembly for a file
+LoopStride.cpp.s:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/LoopStride.cpp.s
+.PHONY : LoopStride.cpp.s
+
+PrefetcherPass.o: PrefetcherPass.cpp.o
+.PHONY : PrefetcherPass.o
+
+# target to build an object file
+PrefetcherPass.cpp.o:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/PrefetcherPass.cpp.o
+.PHONY : PrefetcherPass.cpp.o
+
+PrefetcherPass.i: PrefetcherPass.cpp.i
+.PHONY : PrefetcherPass.i
+
+# target to preprocess a source file
+PrefetcherPass.cpp.i:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/PrefetcherPass.cpp.i
+.PHONY : PrefetcherPass.cpp.i
+
+PrefetcherPass.s: PrefetcherPass.cpp.s
+.PHONY : PrefetcherPass.s
+
+# target to generate assembly for a file
+PrefetcherPass.cpp.s:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/PrefetcherPass.cpp.s
+.PHONY : PrefetcherPass.cpp.s
+
 hook.o: hook.cpp.o
 .PHONY : hook.o
 
@@ -213,6 +261,12 @@ help:
 	@echo "... BBTimer.o"
 	@echo "... BBTimer.i"
 	@echo "... BBTimer.s"
+	@echo "... LoopStride.o"
+	@echo "... LoopStride.i"
+	@echo "... LoopStride.s"
+	@echo "... PrefetcherPass.o"
+	@echo "... PrefetcherPass.i"
+	@echo "... PrefetcherPass.s"
 	@echo "... hook.o"
 	@echo "... hook.i"
 	@echo "... hook.s"

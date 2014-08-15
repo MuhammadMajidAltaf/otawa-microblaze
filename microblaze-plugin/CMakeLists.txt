@@ -23,9 +23,11 @@ set(SCRIPT      "microblaze")	# machine model
 set(NAMESPACE   "otawa")	# namespace (classes must be contained in the namespace otawa::model)
 set(FILES	memory.xml	# cache, pipeline, memory
 	      	pipeline.xml)
-set(MODULES	)		# used modules (to pass to otawa-config=
+set(MODULES	dcache)		# used modules (to pass to otawa-config=
 set(SOURCES 	hook.cpp	# sources of the plugin
 		BBTimer.cpp
+		PrefetcherPass.cpp
+		LoopStride.cpp
 		)		
 
 

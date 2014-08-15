@@ -4,7 +4,7 @@
 		<bank>
 			<name>RAM</name>
 			<address><offset>0x00000000</offset></address>
-			<size>0x00040000</size>
+			<size>0x7FFFFFFF</size>
 			<type>DRAM</type>
 			<latency>100</latency>
 			<write_latency>100</write_latency>
