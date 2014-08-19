@@ -54,28 +54,28 @@
         <step processor="otawa::Virtualizer" />
         <step processor="otawa::DelayedBuilder"/>
     	<step require="otawa::DELAYED_CFG_FEATURE"/>
-        
-        <!--<step require="otawa::ICACHE_CATEGORY_FEATURE" />-->
-        <step require="otawa::ICACHE_CATEGORY2_FEATURE" />
+
+        <step require="otawa::microblaze::BCET_FEATURE" />
+        <step processor="otawa::microblaze::PrefetcherPass" />
+
+        <!-- Ultimately, we don't really care about much of this now... -->
+        <!--<step require="otawa::ICACHE_CATEGORY2_FEATURE" />
         <step require="otawa::COLLECTED_LBLOCKS_FEATURE" />
 
         <step require="otawa::STACK_ANALYSIS_FEATURE" />
-        
-        <!--step require="otawa::dcache::CATEGORY_FEATURE" /-->
 
-        <!--<step processor="otawa::microblaze::PrefetcherPass" />-->
-        <!--<step require="otawa::clp::FEATURE" />-->
         <step processor="otawa::microblaze::BBTimer">
           <config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="out"/>
         </step>
 
-        <step processor="otawa::ipet::CachePenaltiesObjectFunctionBuilder"/>
-        <!---->
+        <step processor="otawa::microblaze::PrefetcherPass" />
+
+        <step processor="otawa::ipet::CachePenaltiesObjectFunctionBuilder"/>-->
         
         <!-- WCET computation -->
-        <step require="otawa::ipet::WCET_FEATURE"/>
+        <!--<step require="otawa::ipet::WCET_FEATURE"/>
         
-        <step processor="otawa::ipet::WCETCountRecorder"/>
+        <step processor="otawa::ipet::WCETCountRecorder"/>-->
         <step processor="otawa::display::CFGOutput">
           <config name="otawa::display::CFGOutput::PATH" value="cfgout"/>
         </step>

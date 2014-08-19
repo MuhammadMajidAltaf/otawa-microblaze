@@ -173,6 +173,30 @@ BBTimer.cpp.s:
 	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/BBTimer.cpp.s
 .PHONY : BBTimer.cpp.s
 
+BCET.o: BCET.cpp.o
+.PHONY : BCET.o
+
+# target to build an object file
+BCET.cpp.o:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/BCET.cpp.o
+.PHONY : BCET.cpp.o
+
+BCET.i: BCET.cpp.i
+.PHONY : BCET.i
+
+# target to preprocess a source file
+BCET.cpp.i:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/BCET.cpp.i
+.PHONY : BCET.cpp.i
+
+BCET.s: BCET.cpp.s
+.PHONY : BCET.s
+
+# target to generate assembly for a file
+BCET.cpp.s:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/BCET.cpp.s
+.PHONY : BCET.cpp.s
+
 LoopStride.o: LoopStride.cpp.o
 .PHONY : LoopStride.o
 
@@ -261,6 +285,9 @@ help:
 	@echo "... BBTimer.o"
 	@echo "... BBTimer.i"
 	@echo "... BBTimer.s"
+	@echo "... BCET.o"
+	@echo "... BCET.i"
+	@echo "... BCET.s"
 	@echo "... LoopStride.o"
 	@echo "... LoopStride.i"
 	@echo "... LoopStride.s"

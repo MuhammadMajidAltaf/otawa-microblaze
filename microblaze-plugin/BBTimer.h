@@ -15,6 +15,7 @@ public:
 	ExeGraph(WorkSpace* ws, ParExeProc* proc, ParExeSequence *seq, const PropList &props = PropList::EMPTY);
 	void build(void);
 	void addEdgesForMemoryOrder(void);
+	void addEdgesForFetch(void);
 
 private:
 	// Convienence access for the memory

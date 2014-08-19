@@ -28,6 +28,7 @@ set(SOURCES 	hook.cpp	# sources of the plugin
 		BBTimer.cpp
 		PrefetcherPass.cpp
 		LoopStride.cpp
+		BCET.cpp
 		)		
 
 

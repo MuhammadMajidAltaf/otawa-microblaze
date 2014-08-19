@@ -77,11 +77,12 @@ void ExeGraph::build(void)
 		{
 			if(inst->inst()->kind() & Inst::IS_LOAD)
 			{
-				findMemoryStage(inst)->setDefaultLatency(1000);
+				findMemoryStage(inst)->setDefaultLatency(1);
 			}
 			else
 			{
-				findMemoryStage(inst)->setDefaultLatency(1000);
+				// Store instruction...
+				findMemoryStage(inst)->setDefaultLatency(TIME_TEST);
 			}
 		}
 	}
@@ -109,7 +110,7 @@ void ExeGraph::build(void)
 				ParExeNode* source_node = curInst->node(memIndex);
 				ParExeNode* dest_node = nextInst->node(memIndex - 1);
 
-				new ParExeEdge(source_node, dest_node, ParExeEdge::SOLID);
+				new ParExeEdge(source_node, dest_node, ParExeEdge::SOLID, 0);
 
 				curInst++;
 				nextInst++;
@@ -159,6 +160,18 @@ void ExeGraph::addEdgesForMemoryOrder(void)
 	}
 }
 
+void ExeGraph::addEdgesForFetch(void)
+{
+	ParExeGraph::addEdgesForFetch();
+
+	ParExeStage *fetch_stage = _microprocessor->fetchStage();
+	for(int i=0 ; i<fetch_stage->numNodes()-1 ; i++) {
+		ParExeNode *node = fetch_stage->node(i);
+		ParExeNode *next = fetch_stage->node(i+1);
+		new ParExeEdge(node, next, ParExeEdge::SOLID);
+    }
+}
+
 // ============================================
 // BBTimer stuff
 // ============================================
@@ -167,12 +180,12 @@ BBTimer::BBTimer(void) : GraphBBTime<ExeGraph>(reg) { }
 void BBTimer::processWorkSpace(WorkSpace* ws)
 {
 	_ws = ws;
-	GraphBBTime<ExeGraph>::processWorkSpace(ws);
-
 	elm::cout << "Setting persistence analysis on..." << elm::io::endl;
 	//dcache::DATA_FIRSTMISS_LEVEL(_props) = dcache::DFML_MULTI;
 	ws->require(dcache::MAY_ACS_FEATURE);
 	ws->require(dcache::CATEGORY_FEATURE, _props);
+
+	GraphBBTime<ExeGraph>::processWorkSpace(ws);
 }
 
 void BBTimer::configure(const PropList& props)
@@ -243,7 +256,7 @@ void BBTimer::analyzePathContext(PathContext*ctxt, int context_index)
 		// set constant latencies (ALWAYS_MISS in the cache)
 		TimingContext default_timing_context;
 		computeDefaultTimingContextForICache(&default_timing_context, sequence);
-		computeDefaultTimingContextForDCache(&default_timing_context, sequence);
+		//computeDefaultTimingContextForDCache(&default_timing_context, sequence);
 		int default_icache_cost = reference_cost;
 		if (!default_timing_context.isEmpty()){
 			if(isVerbose()) {
@@ -277,7 +290,7 @@ void BBTimer::analyzePathContext(PathContext*ctxt, int context_index)
 
 		// TODO: Is it safe to use the same lists here?
 		// TODO: Gonna need to check analyzeTimingContext too...
-		buildNCTimingContextListForDCache(&NC_timing_context_list, sequence);	
+		//buildNCTimingContextListForDCache(&NC_timing_context_list, sequence);	
 
 		// Overridden I-cache one...
 		// Consider renaming the function call...
