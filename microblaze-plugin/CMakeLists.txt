@@ -32,6 +32,7 @@ set(SOURCES 	hook.cpp	# sources of the plugin
 		        DOMOutput.cpp
 		        FunctionSplitter.cpp
 		        FunctionSplitOutput.cpp
+		        AsmDumper.cpp
 		)		
 
 

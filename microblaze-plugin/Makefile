@@ -155,6 +155,30 @@ microblaze/fast:
 	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/build
 .PHONY : microblaze/fast
 
+AsmDumper.o: AsmDumper.cpp.o
+.PHONY : AsmDumper.o
+
+# target to build an object file
+AsmDumper.cpp.o:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/AsmDumper.cpp.o
+.PHONY : AsmDumper.cpp.o
+
+AsmDumper.i: AsmDumper.cpp.i
+.PHONY : AsmDumper.i
+
+# target to preprocess a source file
+AsmDumper.cpp.i:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/AsmDumper.cpp.i
+.PHONY : AsmDumper.cpp.i
+
+AsmDumper.s: AsmDumper.cpp.s
+.PHONY : AsmDumper.s
+
+# target to generate assembly for a file
+AsmDumper.cpp.s:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/AsmDumper.cpp.s
+.PHONY : AsmDumper.cpp.s
+
 BBTimer.o: BBTimer.cpp.o
 .PHONY : BBTimer.o
 
@@ -360,6 +384,9 @@ help:
 	@echo "... list_install_components"
 	@echo "... microblaze"
 	@echo "... rebuild_cache"
+	@echo "... AsmDumper.o"
+	@echo "... AsmDumper.i"
+	@echo "... AsmDumper.s"
 	@echo "... BBTimer.o"
 	@echo "... BBTimer.i"
 	@echo "... BBTimer.s"
