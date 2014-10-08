@@ -12,6 +12,8 @@
 #include <otawa/prog/sem.h>
 #include <otawa/dfa/State.h>
 
+#include <elm/int.h>
+
 #define HAI_DEBUG
 #include <otawa/util/HalfAbsInt.h>
 #include <otawa/util/DefaultFixPoint.h>
@@ -23,6 +25,8 @@
 using namespace otawa;
 using namespace elm;
 using namespace otawa::util;
+
+#define abs(x) x < 0 ? -x : x
 
 #define TRACEU(t)	t
 #define TRACEI(t)	//t

@@ -23,12 +23,15 @@ set(SCRIPT      "microblaze")	# machine model
 set(NAMESPACE   "otawa")	# namespace (classes must be contained in the namespace otawa::model)
 set(FILES	memory.xml	# cache, pipeline, memory
 	      	pipeline.xml)
-set(MODULES	dcache)		# used modules (to pass to otawa-config=
+set(MODULES	dcache display)		# used modules (to pass to otawa-config=
 set(SOURCES 	hook.cpp	# sources of the plugin
-		BBTimer.cpp
-		PrefetcherPass.cpp
-		LoopStride.cpp
-		BCET.cpp
+				BBTimer.cpp
+				PrefetcherPass.cpp
+				LoopStride.cpp
+				BCET.cpp
+		        DOMOutput.cpp
+		        FunctionSplitter.cpp
+		        FunctionSplitOutput.cpp
 		)		
 
 
@@ -56,7 +59,7 @@ include_directories("${CMAKE_SOURCE_DIR}" ".")
 add_library(${SCRIPT} SHARED ${SOURCES})
 set_property(TARGET ${SCRIPT} PROPERTY PREFIX "")
 set_property(TARGET ${SCRIPT} PROPERTY COMPILE_FLAGS "${OTAWA_CFLAGS}")
-target_link_libraries(${SCRIPT} "${OTAWA_LDFLAGS} ${CMAKE_SOURCE_DIR}/../otawa-microblaze/microblaze.so")
+target_link_libraries(${SCRIPT} "${OTAWA_LDFLAGS} ${CMAKE_SOURCE_DIR}/../otawa-microblaze/microblaze.dylib")
 
 # installation
 if(NOT PREFIX)

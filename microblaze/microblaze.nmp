@@ -157,8 +157,8 @@ op MBlaze_typeB = MBlaze_typeB_extended
 
 op MBlaze_typeB_inner = MBlaze_typeB_ALU
                       | MBlaze_typeB_MUL
-                      | MBlaze_typeB_logic      // OR/AND etc
-                      | MBlaze_typeB_RET        // Returns
+                      | MBlaze_typeB_logic     
+                      | MBlaze_typeB_RET        
                       | MBlaze_typeB_BR
                       | MBlaze_typeB_BRC
                       | MBlaze_typeB_LDI
@@ -172,7 +172,7 @@ op MBlaze_typeB_noextend = MBlaze_typeB_BSL
                          | MBlaze_typeB_MTS
 
 op MBlaze_typeB_extended(operation: MBlaze_typeB_inner, immHigh: imm16, immLow: imm16)
-	syntax = operation.syntax
+	syntax = format("%s, %d", operation.syntax, coerce(int(32), immHigh) << 16 | immLow)
 	image = format("101100 00000 00000 %16b %s %16b", immHigh, operation, immLow)
 	action = 
 	{
@@ -182,7 +182,7 @@ op MBlaze_typeB_extended(operation: MBlaze_typeB_inner, immHigh: imm16, immLow: 
 	}
 
 op MBlaze_typeB_notextended(operation: MBlaze_typeB_inner, imm: imm16)
-	syntax = operation.syntax
+	syntax = format("%s, %d", operation.syntax, imm)
 	image = format("%s %16b", operation, imm)
 	action = 
 	{
@@ -195,40 +195,40 @@ op MBlaze_typeA_ALU(keep: bit, carry: bit, rsub: bit, rD: reg_idx, rA: reg_idx0,
 		if rsub == 1 then
 			if extra == 0 then
 				if keep == 1  && carry == 1 then
-					"rsubkc  "
+					format("rsubkc %s, %s, %s ", rD, rA, rB)
 				else 
 					if keep == 1 then
-						"rsubk   "
+						format("rsubk   %s, %s, %s", rD, rA, rB)
 					else 
 						if carry == 1 then
-							"rsubc   "
+							format("rsubc   %s, %s, %s", rD, rA, rB)
 						else
-							"rsub    "
+							format("rsub    %s, %s, %s", rD, rA, rB)
 						endif
 					endif
 				endif
 			else 
 				if extra == 1 then
-					"cmp     "
+					format("cmp     %s, %s, %s", rD, rA, rB)
 				else 
 					if extra == 3 then
-						"cmpu    "
+						format("cmpu    %s, %s, %s", rD, rA, rB)
 					else
-						"WUTLOL     "
+						format("WUTLOL     %s, %s, %s", rD, rA, rB)
 					endif
 				endif
 			endif
 		else
 			if keep == 1  && carry == 1 then
-				"addkc   "
+				format("addkc   %s, %s, %s", rD, rA, rB)
 			else 
 				if keep == 1 then
-					"addk    "
+					format("addk    %s, %s, %s", rD, rA, rB)
 				else 
 					if carry == 1 then
-						"addc    "
+						format("addc    %s, %s, %s", rD, rA, rB)
 					else
-						"add     "
+						format("add     %s, %s, %s", rD, rA, rB)
 					endif
 				endif
 			endif
@@ -264,7 +264,7 @@ op MBlaze_typeA_ALU(keep: bit, carry: bit, rsub: bit, rD: reg_idx, rA: reg_idx0,
 
 op MBlaze_typeB_ALU(keep: bit, carry: bit, rsub: bit, rD: reg_idx, rA: reg_idx0)
 	syntax = 
-		format("%s%s%s", (if rsub == 1 then "rsubi" else "addi" endif), (if keep == 1 then "k" else "" endif), (if carry == 1 then "c" else "" endif))
+		format("%s%s%s %s, %s", (if rsub == 1 then "rsubi" else "addi" endif), (if keep == 1 then "k" else "" endif), (if carry == 1 then "c" else "" endif), rD, rA)
 
 	image = format("001 %1b %1b %1b %s %s", keep, carry, rsub, rD, rA)
 
@@ -301,11 +301,11 @@ op MBlaze_typeA_MUL(rD: reg_idx, rA: reg_idx0, rB: reg_idx0, extra: card(11))
 	syntax = 
 		switch (extra)
 		{
-		case 0: "mul     "
-		case 1: "mulh    "
-		case 3: "mulhu   "
-		case 2: "mulhsu  "
-		default: "DEAD    "
+		case 0: format("mul     %s, %s, %s", rD, rA, rB)
+		case 1: format("mulh    %s, %s, %s", rD, rA, rB)
+		case 3: format("mulhu   %s, %s, %s", rD, rA, rB)
+		case 2: format("mulhsu  %s, %s, %s", rD, rA, rB)
+		default: format("DEAD    %s, %s, %s", rD, rA, rB)
 		}
 
 	image = format("010000 %s %s %s %11b", rD, rA, rB, extra)
@@ -324,7 +324,7 @@ op MBlaze_typeA_MUL(rD: reg_idx, rA: reg_idx0, rB: reg_idx0, extra: card(11))
 	}
 
 op MBlaze_typeB_MUL(rD: reg_idx, rA: reg_idx0)
-	syntax = "muli    "
+	syntax = format("muli    %s, %s", rD, rA)
 
 	image = format("011000 %s %s", rD, rA)
 
@@ -336,15 +336,15 @@ op MBlaze_typeB_MUL(rD: reg_idx, rA: reg_idx0)
 op MBlaze_typeA_BSL(rD: reg_idx, rA: reg_idx0, rB: reg_idx0, extra: card(11))
 	syntax = 
 		if extra == 0 then
-			"bsrl    "
+			format("bsrl    %s,%s,%s", rD, rA, rB)
 		else
 			if extra<9..9> == 1 then
-				"bsra    "
+				format("bsra     %s,%s,%s", rD, rA, rB)
 			else
 				if extra<10..10> == 1 then
-					"bsll    "
+					format("bsll     %s,%s,%s", rD, rA, rB)
 				else
-					"DEAD"
+					format("DEAD %s,%s,%s", rD, rA, rB)
 				endif
 			endif
 		endif
@@ -369,13 +369,13 @@ op MBlaze_typeA_BSL(rD: reg_idx, rA: reg_idx0, rB: reg_idx0, extra: card(11))
 // I'm not implementing this properly for now...
 // I don't actually know if this supports IO...
 op MBlaze_typeA_GETPUTD(T: bit, N: bit, E: bit, A: bit, C: bit, rD: reg_num, rA: reg_num, rB: reg_num)
-	syntax = format("%s%s%s%s%s%sd", 
+	syntax = format("%s%s%s%s%s%sd r%d, r%d, r%d", 
 					if T == 1 then "t" else "" endif,
 				    if N == 1 then "n" else "" endif,
 				    if E == 1 then "e" else "" endif,
 				    if A == 1 then "a" else "" endif,
 				    if C == 1 then "c" else "" endif,
-					if rD > 0 then "get" else "put" endif)
+					if rD > 0 then "get" else "put" endif, rD, rA, rB)
 	image = format("010011 %5b %5b %5b 0 %1b %1b %1b %1b %1b 00000", rD, rA, rB, N, C, T, A, E)
 
 	action = 
@@ -388,15 +388,15 @@ op MBlaze_typeA_GETPUTD(T: bit, N: bit, E: bit, A: bit, C: bit, rD: reg_num, rA:
 op MBlaze_typeB_BSL(rD: reg_idx, rA: reg_idx0, extra: card(11), imm: card(5))
 	syntax = 
 		if extra == 0 then
-			"bsrli   "
+			format("bsrli    %s,%s,%d", rD, rA, imm)
 		else
 			if extra<4..4> == 1 then
-				"bsrai   "
+				format("bsrai    %s,%s,%d", rD, rA, imm)
 			else
 				if extra<5..5> == 1 then
-					"bslli   "
+					format("bslli    %s,%s,%d", rD, rA, imm)
 				else
-					"DEAD"
+					format("DEAD %s,%s,%d", rD, rA, imm)
 				endif
 			endif
 		endif
@@ -419,12 +419,12 @@ op MBlaze_typeB_BSL(rD: reg_idx, rA: reg_idx0, extra: card(11), imm: card(5))
 	}
 
 op MBlaze_typeB_GET(T: bit, N: bit, E: bit, A: bit, C: bit, rD: reg_idx, fsln: card(4))
-	syntax = format("%s%s%s%s%sget", 
+	syntax = format("%s%s%s%s%sget %s,rfsl%d", 
 					if T == 1 then "t" else "" endif,
 				    if N == 1 then "n" else "" endif,
 				    if E == 1 then "e" else "" endif,
 				    if A == 1 then "a" else "" endif,
-				    if C == 1 then "c" else "" endif)
+				    if C == 1 then "c" else "" endif, rD, fsln)
 
 	image = format("011011 %s 00000 0 %1b %1b %1b %1b %1b 000000 %4b", rD, N, C, T, A, E, fsln)
 
@@ -434,12 +434,12 @@ op MBlaze_typeB_GET(T: bit, N: bit, E: bit, A: bit, C: bit, rD: reg_idx, fsln: c
 	}
 
 op MBlaze_typeB_PUT(T: bit, N: bit, E: bit, A: bit, C: bit, rA: reg_idx0, fsln: card(4))
-	syntax = format("%s%s%s%s%sput", 
+	syntax = format("%s%s%s%s%sput %s,rfsl%d", 
 					if T == 1 then "t" else "" endif,
 				    if N == 1 then "n" else "" endif,
 				    if E == 1 then "e" else "" endif,
 				    if A == 1 then "a" else "" endif,
-				    if C == 1 then "c" else "" endif)
+				    if C == 1 then "c" else "" endif, rA, fsln)
 
 	image = format("011011 00000 %s 1 %1b %1b %1b %1b %1b 000000 %4b", rA, N, C, T, A, E, fsln)
 
@@ -451,10 +451,10 @@ op MBlaze_typeB_PUT(T: bit, N: bit, E: bit, A: bit, C: bit, rA: reg_idx0, fsln: 
 op MBlaze_typeA_logic(opc: card(2), rD: reg_idx, rA: reg_idx0, rB: reg_idx0)
 	syntax = switch(opc)
 	{
-		case 0: "or      "
-		case 1: "and     "
-		case 2: "xor     "
-		case 3: "andn    "
+		case 0: format("or      %s,%s,%s", rD, rA, rB)
+		case 1: format("and     %s,%s,%s", rD, rA, rB)
+		case 2: format("xor     %s,%s,%s", rD, rA, rB)
+		case 3: format("andn    %s,%s,%s", rD, rA, rB)
 	}
 
 	image = format("1000 %2b %s %s %s 00000000000", opc, rD, rA, rB)
@@ -473,10 +473,10 @@ op MBlaze_typeA_logic(opc: card(2), rD: reg_idx, rA: reg_idx0, rB: reg_idx0)
 op MBlaze_typeA_PCMP(opc: card(2), rD: reg_idx, rA: reg_idx0, rB: reg_idx0)
 	syntax = switch(opc)
 	{
-		case 0: "pcmpbf  "
-		case 1: "DEAD"
-		case 2: "pcmpeq  "
-		case 3: "pcmpne  "
+		case 0: format("pcmpbf  %s,%s,%s", rD, rA, rB)
+		case 1: format("DEAD    %s,%s,%s", rD, rA, rB)
+		case 2: format("pcmpeq  %s,%s,%s", rD, rA, rB)
+		case 3: format("pcmpne  %s,%s,%s", rD, rA, rB)
 	}
 
 	image = format("1000 %2b %s %s %s 10000000000", opc, rD, rA, rB)
@@ -526,14 +526,14 @@ op MBlaze_typeB_UTIL(rD: reg_idx, rA: reg_idx0, imm: imm16)
 	syntax = 
 		switch(imm)
 		{
-			case 0x0001: "sra     "
-			case 0x0021: "src     "
-			case 0x0041: "srl     "
-			case 0x0060: "sext8   "
-			case 0x0061: "sext16  "
-			case 0x00E0: "clz     "
-			case 0x01E0: "swapb   "
-			case 0x01E2: "swaph   "
+			case 0x0001: format("sra     %s,%s", rD, rA)
+			case 0x0021: format("src     %s,%s", rD, rA)
+			case 0x0041: format("srl     %s,%s", rD, rA)
+			case 0x0060: format("sext8   %s,%s", rD, rA)
+			case 0x0061: format("sext16  %s,%s", rD, rA)
+			case 0x00E0: format("clz     %s,%s", rD, rA)
+			case 0x01E0: format("swapb   %s,%s", rD, rA)
+			case 0x01E2: format("swaph   %s,%s", rD, rA)
 			default: "DEAD"
 		}
 
@@ -614,10 +614,10 @@ op MBlaze_typeB_MFS(setn: bit, copy: bit, rD: reg_idx, spr: card(14))
 	}
 
 op MBlaze_typeA_BR(rD: reg_idx, rB: reg_idx0, abs: bit, delayed: bit, linked: bit)
-	syntax = format("br%s%s%s", 
+	syntax = format("br%s%s%s %s,%s", 
 					if abs == 1 then "a" else "" endif,
 					if linked == 1 then "l" else "" endif,
-					if delayed == 1 then "d" else "" endif)
+					if delayed == 1 then "d" else "" endif, rD, rB)
 
 	image = format("100110 %s %1b %1b %1b 00 %s 00000000000", rD, delayed, abs, linked, rB)
 
@@ -645,23 +645,23 @@ op MBlaze_typeA_BRC(rA: reg_idx0, rB: reg_idx0, delayed: bit, cond: card(3))
 		if delayed == 1 then
 			switch(cond)
 			{
-				case 0: "beqd    "
-				case 1: "bned    "
-				case 2: "bltd    "
-				case 3: "bled    "
-				case 4: "bgtd    "
-				case 5: "bged    "
+				case 0: format("beqd    %s,%s", rA, rB)
+				case 1: format("bned    %s,%s", rA, rB)
+				case 2: format("bltd    %s,%s", rA, rB)
+				case 3: format("bled    %s,%s", rA, rB)
+				case 4: format("bgtd    %s,%s", rA, rB)
+				case 5: format("bged    %s,%s", rA, rB)
 				default: "DEAD"
 			}
 		else
 			switch(cond)
 			{
-				case 0: "beq     "
-				case 1: "bne     "
-				case 2: "blt     "
-				case 3: "ble     "
-				case 4: "bgt     "
-				case 5: "bge     "
+				case 0: format("beq     %s,%s", rA, rB)
+				case 1: format("bne     %s,%s", rA, rB)
+				case 2: format("blt     %s,%s", rA, rB)
+				case 3: format("ble     %s,%s", rA, rB)
+				case 4: format("bgt     %s,%s", rA, rB)
+				case 5: format("bge     %s,%s", rA, rB)
 				default: "DEAD"
 			}
 		endif
@@ -693,10 +693,10 @@ op MBlaze_typeA_BRC(rA: reg_idx0, rB: reg_idx0, delayed: bit, cond: card(3))
 op MBlaze_typeB_logic(opc: card(2), rD: reg_idx, rA: reg_idx0)
 	syntax = switch(opc)
 	{
-		case 0: "ori     "
-		case 1: "andi    "
-		case 2: "xori    "
-		case 3: "andni   "
+		case 0: format("ori     %s,%s", rD, rA)
+		case 1: format("andi    %s,%s", rD, rA)
+		case 2: format("xori    %s,%s", rD, rA)
+		case 3: format("andni   %s,%s", rD, rA)
 	}
 
 	image = format("1010 %2b %s %s", opc, rD, rA)
@@ -715,15 +715,15 @@ op MBlaze_typeB_logic(opc: card(2), rD: reg_idx, rA: reg_idx0)
 op MBlaze_typeB_RET(intr: bit, brk: bit, exc: bit, rA: reg_idx0)
 	syntax = 
 		if intr == 1 then
-			"rtid    "
+			format("rtid    %s", rA)
 		else
 			if brk == 1 then
-				"rtbd    "
+				format("rtbd    %s", rA)
 			else
 				if exc == 1 then
-					"rted    "
+					format("rted    %s", rA)
 				else
-					"rtsd    "
+					format("rtsd    %s", rA)
 				endif
 			endif
 		endif
@@ -737,10 +737,10 @@ op MBlaze_typeB_RET(intr: bit, brk: bit, exc: bit, rA: reg_idx0)
 	}
 
 op MBlaze_typeB_BR(rD: reg_idx, abs: bit, delayed: bit, linked: bit)
-	syntax = format("br%s%si%s", 
+	syntax = format("br%s%si%s %s", 
 					if abs == 1 then "a" else "" endif,
 					if linked == 1 then "l" else "" endif,
-					if delayed == 1 then "d" else "" endif)
+					if delayed == 1 then "d" else "" endif, rD)
 
 	image = format("101110 %s %1b %1b %1b 00", rD, delayed, abs, linked)
 
@@ -768,23 +768,23 @@ op MBlaze_typeB_BRC(rA: reg_idx0, delayed: bit, cond: card(3))
 		if delayed == 1 then
 			switch(cond)
 			{
-				case 0: "beqid   "
-				case 1: "bneid   "
-				case 2: "bltid   "
-				case 3: "bleid   "
-				case 4: "bgtid   "
-				case 5: "bgeid   "
+				case 0: format("beqid   %s", rA)
+				case 1: format("bneid   %s", rA)
+				case 2: format("bltid   %s", rA)
+				case 3: format("bleid   %s", rA)
+				case 4: format("bgtid   %s", rA)
+				case 5: format("bgeid   %s", rA)
 				default: "DEAD"
 			}
 		else
 			switch(cond)
 			{
-				case 0: "beqi     "
-				case 1: "bnei     "
-				case 2: "blti     "
-				case 3: "blei     "
-				case 4: "bgti     "
-				case 5: "bgei     "
+				case 0: format("beqi    %s", rA)
+				case 1: format("bnei    %s", rA)
+				case 2: format("blti    %s", rA)
+				case 3: format("blei    %s", rA)
+				case 4: format("bgti    %s", rA)
+				case 5: format("bgei    %s", rA)
 				default: "DEAD"
 			}
 		endif
@@ -814,12 +814,12 @@ op MBlaze_typeB_BRC(rA: reg_idx0, delayed: bit, cond: card(3))
 	}
 
 op MBlaze_typeA_LD(half: bit, word: bit, reversed: bit, exclusive: bit, rD: reg_idx, rA: reg_idx0, rB: reg_idx0)
-	syntax = format("l%s%s%s%s%s", 
+	syntax = format("l%s%s%s%s%s %s,%s,%s", 
 					if half == 0 && word == 0 then "b" else "" endif,
 					if half == 1 then "h" else "" endif,
 					if word == 1 then "w" else "" endif,
 					if reversed == 1 then "r" else "" endif,
-					if exclusive == 1 then "x" else "" endif)
+					if exclusive == 1 then "x" else "" endif, rD, rA, rB)
 
 	image = format("1100 %1b %1b %s %s %s %1b %1b 000000000", word, half, rD, rA, rB, exclusive, reversed)
 
@@ -849,12 +849,12 @@ op MBlaze_typeA_LD(half: bit, word: bit, reversed: bit, exclusive: bit, rD: reg_
 	}
 
 op MBlaze_typeA_ST(half: bit, word: bit, reversed: bit, exclusive: bit, rD: reg_idx, rA: reg_idx0, rB: reg_idx0)
-	syntax = format("s%s%s%s%s%s", 
+	syntax = format("s%s%s%s%s%s %s,%s,%s", 
 					if half == 0 && word == 0 then "b" else "" endif,
 					if half == 1 then "h" else "" endif,
 					if word == 1 then "w" else "" endif,
 					if reversed == 1 then "r" else "" endif,
-					if exclusive == 1 then "x" else "" endif)
+					if exclusive == 1 then "x" else "" endif, rD, rA, rB)
 
 	image = format("1101 %1b %1b %s %s %s %1b %1b 000000000", word, half, rD, rA, rB, exclusive, reversed)
 
@@ -882,10 +882,10 @@ op MBlaze_typeA_ST(half: bit, word: bit, reversed: bit, exclusive: bit, rD: reg_
 	}
 
 op MBlaze_typeB_LDI(half: bit, word: bit, rD: reg_idx, rA: reg_idx0)
-	syntax = format("l%s%s%si", 
+	syntax = format("l%s%s%si %s,%s", 
 					if half == 0 && word == 0 then "b" else "" endif,
 					if half == 1 then "h" else "" endif,
-					if word == 1 then "w" else "" endif)
+					if word == 1 then "w" else "" endif, rD, rA)
 
 	image = format("1110 %1b %1b %s %s", word, half, rD, rA)
 
@@ -915,10 +915,10 @@ op MBlaze_typeB_LDI(half: bit, word: bit, rD: reg_idx, rA: reg_idx0)
 	}
 
 op MBlaze_typeB_STI(half: bit, word: bit, rD: reg_idx, rA: reg_idx0)
-	syntax = format("s%s%s%si", 
+	syntax = format("s%s%s%si %s,%s", 
 					if half == 0 && word == 0 then "b" else "" endif,
 					if half == 1 then "h" else "" endif,
-					if word == 1 then "w" else "" endif)
+					if word == 1 then "w" else "" endif, rD, rA)
 
 	image = format("1111 %1b %1b %s %s", word, half, rD, rA)
 

@@ -8,7 +8,7 @@ default_target: all
 #=============================================================================
 # Special targets provided by cmake.
 
-# Disable implicit rules so canoncical targets will work.
+# Disable implicit rules so canonical targets will work.
 .SUFFIXES:
 
 # Remove some rules from gmake that .SUFFIXES does not remove.
@@ -30,24 +30,30 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /usr/bin/cmake
+CMAKE_COMMAND = /usr/local/Cellar/cmake/2.8.12.2/bin/cmake
 
 # The command to remove a file.
-RM = /usr/bin/cmake -E remove -f
+RM = /usr/local/Cellar/cmake/2.8.12.2/bin/cmake -E remove -f
+
+# Escaping for special characters.
+EQUALS = =
+
+# The program to use to edit the cache.
+CMAKE_EDIT_COMMAND = /usr/local/Cellar/cmake/2.8.12.2/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/jamie/otawa/microblaze-plugin
+CMAKE_SOURCE_DIR = /Users/jamie/otawa/microblaze-plugin
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/jamie/otawa/microblaze-plugin
+CMAKE_BINARY_DIR = /Users/jamie/otawa/microblaze-plugin
 
 #=============================================================================
 # Targets provided globally by CMake.
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running interactive CMake command-line interface..."
-	/usr/bin/cmake -i .
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
+	/usr/local/Cellar/cmake/2.8.12.2/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -57,19 +63,19 @@ edit_cache/fast: edit_cache
 # Special rule for the target install
 install: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
+	/usr/local/Cellar/cmake/2.8.12.2/bin/cmake -P cmake_install.cmake
 .PHONY : install
 
 # Special rule for the target install
 install/fast: preinstall/fast
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
+	/usr/local/Cellar/cmake/2.8.12.2/bin/cmake -P cmake_install.cmake
 .PHONY : install/fast
 
 # Special rule for the target install/local
 install/local: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+	/usr/local/Cellar/cmake/2.8.12.2/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
 .PHONY : install/local
 
 # Special rule for the target install/local
@@ -79,7 +85,7 @@ install/local/fast: install/local
 # Special rule for the target install/strip
 install/strip: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
-	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+	/usr/local/Cellar/cmake/2.8.12.2/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
 .PHONY : install/strip
 
 # Special rule for the target install/strip
@@ -98,7 +104,7 @@ list_install_components/fast: list_install_components
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/usr/local/Cellar/cmake/2.8.12.2/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -107,9 +113,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/jamie/otawa/microblaze-plugin/CMakeFiles /home/jamie/otawa/microblaze-plugin/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/jamie/otawa/microblaze-plugin/CMakeFiles /Users/jamie/otawa/microblaze-plugin/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/jamie/otawa/microblaze-plugin/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/jamie/otawa/microblaze-plugin/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -196,6 +202,78 @@ BCET.s: BCET.cpp.s
 BCET.cpp.s:
 	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/BCET.cpp.s
 .PHONY : BCET.cpp.s
+
+DOMOutput.o: DOMOutput.cpp.o
+.PHONY : DOMOutput.o
+
+# target to build an object file
+DOMOutput.cpp.o:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/DOMOutput.cpp.o
+.PHONY : DOMOutput.cpp.o
+
+DOMOutput.i: DOMOutput.cpp.i
+.PHONY : DOMOutput.i
+
+# target to preprocess a source file
+DOMOutput.cpp.i:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/DOMOutput.cpp.i
+.PHONY : DOMOutput.cpp.i
+
+DOMOutput.s: DOMOutput.cpp.s
+.PHONY : DOMOutput.s
+
+# target to generate assembly for a file
+DOMOutput.cpp.s:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/DOMOutput.cpp.s
+.PHONY : DOMOutput.cpp.s
+
+FunctionSplitOutput.o: FunctionSplitOutput.cpp.o
+.PHONY : FunctionSplitOutput.o
+
+# target to build an object file
+FunctionSplitOutput.cpp.o:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/FunctionSplitOutput.cpp.o
+.PHONY : FunctionSplitOutput.cpp.o
+
+FunctionSplitOutput.i: FunctionSplitOutput.cpp.i
+.PHONY : FunctionSplitOutput.i
+
+# target to preprocess a source file
+FunctionSplitOutput.cpp.i:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/FunctionSplitOutput.cpp.i
+.PHONY : FunctionSplitOutput.cpp.i
+
+FunctionSplitOutput.s: FunctionSplitOutput.cpp.s
+.PHONY : FunctionSplitOutput.s
+
+# target to generate assembly for a file
+FunctionSplitOutput.cpp.s:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/FunctionSplitOutput.cpp.s
+.PHONY : FunctionSplitOutput.cpp.s
+
+FunctionSplitter.o: FunctionSplitter.cpp.o
+.PHONY : FunctionSplitter.o
+
+# target to build an object file
+FunctionSplitter.cpp.o:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/FunctionSplitter.cpp.o
+.PHONY : FunctionSplitter.cpp.o
+
+FunctionSplitter.i: FunctionSplitter.cpp.i
+.PHONY : FunctionSplitter.i
+
+# target to preprocess a source file
+FunctionSplitter.cpp.i:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/FunctionSplitter.cpp.i
+.PHONY : FunctionSplitter.cpp.i
+
+FunctionSplitter.s: FunctionSplitter.cpp.s
+.PHONY : FunctionSplitter.s
+
+# target to generate assembly for a file
+FunctionSplitter.cpp.s:
+	$(MAKE) -f CMakeFiles/microblaze.dir/build.make CMakeFiles/microblaze.dir/FunctionSplitter.cpp.s
+.PHONY : FunctionSplitter.cpp.s
 
 LoopStride.o: LoopStride.cpp.o
 .PHONY : LoopStride.o
@@ -288,6 +366,15 @@ help:
 	@echo "... BCET.o"
 	@echo "... BCET.i"
 	@echo "... BCET.s"
+	@echo "... DOMOutput.o"
+	@echo "... DOMOutput.i"
+	@echo "... DOMOutput.s"
+	@echo "... FunctionSplitOutput.o"
+	@echo "... FunctionSplitOutput.i"
+	@echo "... FunctionSplitOutput.s"
+	@echo "... FunctionSplitter.o"
+	@echo "... FunctionSplitter.i"
+	@echo "... FunctionSplitter.s"
 	@echo "... LoopStride.o"
 	@echo "... LoopStride.i"
 	@echo "... LoopStride.s"

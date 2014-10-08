@@ -52,8 +52,12 @@
 
     <script>
         <step processor="otawa::Virtualizer" />
+        <step require="otawa::UNROLLED_LOOPS_FEATURE" />
         <step processor="otawa::DelayedBuilder"/>
     	<step require="otawa::DELAYED_CFG_FEATURE"/>
+
+        <step require="otawa::ICACHE_CATEGORY2_FEATURE" />
+        <step require="otawa::COLLECTED_LBLOCKS_FEATURE" />
 
         <step require="otawa::microblaze::BCET_FEATURE" />
         <step processor="otawa::microblaze::PrefetcherPass" />
