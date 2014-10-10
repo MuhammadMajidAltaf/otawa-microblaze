@@ -160,7 +160,7 @@ void AsmDumper::processWorkSpace(WorkSpace* ws)
 			} // while(next != 0)
 		}
 
-		return;
+		//return;
 	}
 }
 
