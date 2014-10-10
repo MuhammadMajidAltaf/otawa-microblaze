@@ -163,7 +163,7 @@ public:
 		return 0;
 	}
 
-	virtual int instSize(void) const { return 4; }
+	virtual int instSize(void) const { return 0; }
 
 	void decodeRegs( Inst *inst, elm::genstruct::AllocatedTable<hard::Register *> *in, elm::genstruct::AllocatedTable<hard::Register *> *out);
 
@@ -315,7 +315,7 @@ public:
 	: Inst(process, kind, addr, size), _target(0), isTargetDone(false) {
 	}
 
-	virtual ot::size size() const { return 4; }
+	//virtual ot::size size() const { return _size; }
 
 	virtual otawa::Inst *target() {
 		if (!isTargetDone) {

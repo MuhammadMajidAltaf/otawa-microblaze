@@ -95,10 +95,10 @@ bool FunctionSplitter::isReady(BasicBlock* bb)
 
 		if(dom->contains(bb2->number()))
 		{
-			elm::cout << "FUNCSPLIT READY: checking BB " << bb2->number() << elm::io::endl;
+			//elm::cout << "FUNCSPLIT READY: checking BB " << bb2->number() << elm::io::endl;
 			if(REGION(bb2) == (FunctionRegion*)NULL)
 			{
-				elm::cout << "FUNCSPLIT READY: BB " << bb2->number() << " is not ready" << elm::io::endl;
+				//elm::cout << "FUNCSPLIT READY: BB " << bb2->number() << " is not ready" << elm::io::endl;
 				return false;
 			}
 		}
@@ -143,17 +143,17 @@ bool FunctionSplitter::canGrow(FunctionRegion* r, BasicBlock* bb)
 		{
 			if(REGION(in->source()) != r)
 			{
-				elm::cout << "FUNCSPLIT CANGROW: BB" << bb->number() << " does not have all parents in the same region." << elm::io::endl;
-				elm::cout << "FUNCSPLIT CANGROW: BB" << in->source()->number() << " is in region " << REGION(in->source()) << elm::io::endl;
+				//elm::cout << "FUNCSPLIT CANGROW: BB" << bb->number() << " does not have all parents in the same region." << elm::io::endl;
+				//elm::cout << "FUNCSPLIT CANGROW: BB" << in->source()->number() << " is in region " << REGION(in->source()) << elm::io::endl;
 				return false;
 			}
 		}
 
-		elm::cout << "FUNCSPLIT CANGROW: BB" << bb->number() << " is trivial. Considering" << elm::io::endl;
+		//elm::cout << "FUNCSPLIT CANGROW: BB" << bb->number() << " is trivial. Considering" << elm::io::endl;
 		newBBsz = bb->size();
 	}
 
-	elm::cout << "FUNCSPLIT CANGROW: New size " << sz+newBBsz << ". Max " << REGION_SIZE << elm::io::endl;
+	//elm::cout << "FUNCSPLIT CANGROW: New size " << sz+newBBsz << ". Max " << REGION_SIZE << elm::io::endl;
 
 	if(sz + newBBsz < REGION_SIZE)
 		return true;
@@ -172,7 +172,7 @@ elm::genstruct::VectorQueue<FunctionRegion*> FunctionSplitter::growRegion(Functi
 	BasicBlock* bb = fr->getContainedBBs()[0];
 	ASSERT(bb);
 
-	elm::cout << "Growing region from BB "<< bb->number() << elm::io::endl;
+	//elm::cout << "Growing region from BB "<< bb->number() << elm::io::endl;
 
 	elm::genstruct::VectorQueue<BasicBlock*> bbList;
 	
@@ -185,7 +185,7 @@ elm::genstruct::VectorQueue<FunctionRegion*> FunctionSplitter::growRegion(Functi
 		if(!isReady(cBB->target()))
 			continue;
 
-		elm::cout << "From BB" << bb->number() << " trying BB" << cBB->target()->number() << elm::io::endl;
+		//elm::cout << "From BB" << bb->number() << " trying BB" << cBB->target()->number() << elm::io::endl;
 
 		bbList.put(cBB->target());
 	}
@@ -199,15 +199,19 @@ elm::genstruct::VectorQueue<FunctionRegion*> FunctionSplitter::growRegion(Functi
 
 		if(canGrow(fr, nextBB))
 		{
-			elm::cout << "FUNCSPLIT: Can grow with BB " << nextBB->number() << elm::io::endl;
+			//elm::cout << "FUNCSPLIT: Can grow with BB " << nextBB->number() << elm::io::endl;
 			
 			// If it's a loop header, add all BBs into the region, otherwise
 			// just add the node into the region
 			elm::genstruct::Vector<BasicBlock*> newBBs = getLoopBBs(nextBB);
 			for(elm::genstruct::Vector<BasicBlock*>::Iterator i(newBBs); i; i++)
 			{
-				elm::cout << "Adding BB" << i->number() << " to region" << elm::io::endl;
+				//elm::cout << "Adding BB" << i->number() << " to region" << elm::io::endl;
 				fr->addBB(i);
+
+				if(REGION(i) != 0)
+					elm::cout << "FUNCSPLIT WARNING!: Overwriting region of BB" << i->number() << elm::io::endl;
+
 				REGION(i) = fr;
 			}
 
@@ -220,7 +224,7 @@ elm::genstruct::VectorQueue<FunctionRegion*> FunctionSplitter::growRegion(Functi
 				{
 					if(BACK_EDGE(cBB))
 					{
-						elm::cout << "GOT BACK EDGE, ABORTING " << cBB->source()->number() << " - " << cBB->target()->number() << elm::io::endl;
+						//elm::cout << "GOT BACK EDGE, ABORTING " << cBB->source()->number() << " - " << cBB->target()->number() << elm::io::endl;
 						continue;
 					}
 					// If it's an external call
@@ -236,7 +240,7 @@ elm::genstruct::VectorQueue<FunctionRegion*> FunctionSplitter::growRegion(Functi
 					if(bbList.contains(cBB->target()))
 						continue;
 
-					elm::cout << "FUNCSPLIT: Adding BB" << cBB->target()->number() << " to work list" << elm::io::endl;
+					//elm::cout << "FUNCSPLIT: Adding BB" << cBB->target()->number() << " to work list" << elm::io::endl;
 
 					bbList.put(cBB->target());
 				}
@@ -253,11 +257,11 @@ elm::genstruct::VectorQueue<FunctionRegion*> FunctionSplitter::growRegion(Functi
 
 				newRegions.put(newFr);
 
-				elm::cout << "FUNCSPLIT: BB" << nextBB->number() << " is too large..." << (LOOP_HEADER(nextBB) ? " is loop header " : "") << elm::io::endl;
+				//elm::cout << "FUNCSPLIT: BB" << nextBB->number() << " is too large..." << (LOOP_HEADER(nextBB) ? " is loop header " : "") << elm::io::endl;
 			}
 		}
 
-		elm::cout << "FUNCSPLIT: Considering candidate BB " << nextBB->number() << elm::io::endl;
+		//elm::cout << "FUNCSPLIT: Considering candidate BB " << nextBB->number() << elm::io::endl;
 	}
 
 	return newRegions;
@@ -270,7 +274,7 @@ void FunctionSplitter::processWorkSpace(WorkSpace* ws)
 
 	for(CFGCollection::Iterator cfg(cfgs); cfg; cfg++)
 	{
-		elm::cout << "FUNCSPLIT: Working on CFG " << cfg->label() << elm::io::endl;
+		//elm::cout << "FUNCSPLIT: Working on CFG " << cfg->label() << elm::io::endl;
 
 		BasicBlock* rootBB = cfg->firstBB();
 		ASSERT(rootBB);
