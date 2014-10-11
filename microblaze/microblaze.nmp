@@ -821,8 +821,8 @@ op MBlaze_typeB_BRC(rA: reg_idx0, delayed: bit, cond: card(3))
 
 op MBlaze_typeA_LD(half: bit, word: bit, reversed: bit, exclusive: bit, rD: reg_idx, rA: reg_idx0, rB: reg_idx0)
 	syntax = format("l%s%s%s%s%s %s,%s,%s", 
-					if half == 0 && word == 0 then "b" else "" endif,
-					if half == 1 then "h" else "" endif,
+					if half == 0 && word == 0 then "bu" else "" endif,
+					if half == 1 then "hu" else "" endif,
 					if word == 1 then "w" else "" endif,
 					if reversed == 1 then "r" else "" endif,
 					if exclusive == 1 then "x" else "" endif, rD, rA, rB)
@@ -916,8 +916,8 @@ op MBlaze_typeA_FPU(rD : reg_idx, rA : reg_idx0, rB : reg_idx0, fpuop : card(6))
 
 op MBlaze_typeB_LDI(half: bit, word: bit, rD: reg_idx, rA: reg_idx0)
 	syntax = format("l%s%s%si %s,%s,", 
-					if half == 0 && word == 0 then "b" else "" endif,
-					if half == 1 then "h" else "" endif,
+					if half == 0 && word == 0 then "bu" else "" endif,
+					if half == 1 then "hu" else "" endif,
 					if word == 1 then "w" else "" endif, rD, rA)
 
 	image = format("1110 %1b %1b %s %s", word, half, rD, rA)

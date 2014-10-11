@@ -49,6 +49,9 @@ void AsmDumper::processWorkSpace(WorkSpace* ws)
 		elm::io::OutStream* strm = elm::sys::System::createFile(p);
 		io::Output output(*strm);
 
+		// First dump the global decl for the first region
+		output << ".globl " << cfg->label() << "_BB1;" << elm::io::endl;
+
 		// So, first, we need to get a queue with all of the regions in it...
 		elm::genstruct::Vector<FunctionRegion*> regions;
 		for(CFG::BBIterator bb(cfg); bb; bb++)
