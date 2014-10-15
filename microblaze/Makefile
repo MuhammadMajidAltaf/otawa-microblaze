@@ -6,7 +6,7 @@ GLISS_PREFIX=../gliss2
 WITH_DISASM=1	# comment it to prevent disassembler building
 #WITH_SIM=1		# comment it to prevent simulator building
 
-MEMORY=io_mem
+MEMORY=vfast_mem
 LOADER=old_elf
 SYSCALL=syscall-linux
 

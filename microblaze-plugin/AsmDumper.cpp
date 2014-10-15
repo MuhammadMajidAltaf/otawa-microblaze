@@ -51,6 +51,7 @@ void AsmDumper::processWorkSpace(WorkSpace* ws)
 
 		// First dump the global decl for the first region
 		output << ".globl " << cfg->label() << "_BB1;" << elm::io::endl;
+        output << ".globl " << cfg->label() << elm::io::endl;
 
 		// So, first, we need to get a queue with all of the regions in it...
 		elm::genstruct::Vector<FunctionRegion*> regions;
@@ -60,11 +61,22 @@ void AsmDumper::processWorkSpace(WorkSpace* ws)
 
 		elm::genstruct::Vector<BasicBlock*> visited;
 
+        // Output the label at the root of the CFG
+        output << cfg->label() << ":" << elm::io::endl;
+
+        // To print region numbers
+        int regNo = 0;
+
 		for(elm::genstruct::Vector<FunctionRegion*>::Iterator region(regions); region; region++)
 		{
 			// Dump all of the BBs...
 			elm::genstruct::Vector<BasicBlock*> bbs = region->getContainedBBs();
 			elm::genstruct::VectorQueue<BasicBlock*> todo;
+
+			//elm::cout << "Got region " << regNo << " size " << region->getRegionSize() << elm::io::endl;
+
+			// Dump out the label for the start of the region
+			output << "REGION_" << cfg->label() << "_" << regNo << ":" << elm::io::endl;
 			
 			BasicBlock* next = bbs[0];
 
@@ -97,18 +109,18 @@ void AsmDumper::processWorkSpace(WorkSpace* ws)
 					{
 						// Figure out where it goes!
 						Inst* tgt = inst->target();
-						if(!tgt) // Normally happens in the case of a return...
-							elm::cout << "BB" << next->number() << " No target..." << elm::io::endl;
-						else
+
+						// Sometimes don't get a target in the case of a return.
+						if(tgt)
 						{
-							elm::cout << "Got target!" << elm::io::endl;
+							//elm::cout << "Got target!" << elm::io::endl;
 
 							// Take both out edges, and figure out where it actually goes
 							for(BasicBlock::OutIterator out(next); out; out++)
 							{
 								if(out->target()->address() == tgt->address())
 								{
-									elm::cout << "BB " << next->number() << " jump to BB" << out->target()->number() << elm::io::endl;
+									//elm::cout << "BB " << next->number() << " jump to BB" << out->target()->number() << elm::io::endl;
 									int jumpAddrSplit = instTxt.lastIndexOf(',');
 									if(jumpAddrSplit == -1)
 										jumpAddrSplit = instTxt.lastIndexOf(' ');
@@ -145,12 +157,24 @@ void AsmDumper::processWorkSpace(WorkSpace* ws)
 
 							output << newInst.toString() << elm::io::endl;
 						}
-						else // Fallthru. Go there next
-							newNext = out->target();
+						else // Fallthru. Go there next if it's not already been dumped...
+						{
+							if(visited.contains(out->target()))
+							{
+								// Already hit it. Insert a jump to it instead
+								elm::StringBuffer newInst;
+								newInst << "\tbri " << out->target()->cfg()->label() << "_BB" << out->target()->number() << " # ADDED";
+
+								output << newInst.toString() << elm::io::endl;
+							}
+							else
+							{
+								newNext = out->target();
+							}
+						}
 					}
-					else if(out->kind() != Edge::CALL && !visited.contains(out->target())) // Jump. Queue it for later.
+					else if(out->kind() != Edge::CALL && !visited.contains(out->target()) && REGION(out->target()) == REGION(next)) // Jump. Queue it for later.
 					{
-						elm::cout << "Queueing edge of type " << Edge::kindName(out->kind()) << elm::io::endl;
 						todo.put(out->target());
 					}
 				}
@@ -161,9 +185,11 @@ void AsmDumper::processWorkSpace(WorkSpace* ws)
 
 				next = newNext;
 			} // while(next != 0)
-		}
 
-		//return;
+			// And finally the label to end the region
+			output << "ENDREGION_" << cfg->label() << "_" << regNo++ << ":" << elm::io::endl;
+
+		} // FunctionRegion iterator
 	}
 }
 

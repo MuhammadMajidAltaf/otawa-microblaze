@@ -16,7 +16,8 @@ using namespace otawa;
 using namespace otawa::dfa;
 
 // TODO: Actually, you know, make this a parameter later
-#define REGION_SIZE 1024
+// TODO: Make more intelligence rather than just lowering the number...
+#define REGION_SIZE (1024-128)
 
 namespace otawa { namespace microblaze {
 
@@ -125,35 +126,25 @@ elm::genstruct::Vector<BasicBlock*> FunctionSplitter::getLoopBBs(BasicBlock* hea
 	return loopBBs;
 }
 
+// Can we grow BB bb into FunctionRegion r?
 bool FunctionSplitter::canGrow(FunctionRegion* r, BasicBlock* bb)
 {
 	int sz = r->getRegionSize();
 	int newBBsz = 0;
 
-	// Get the size of the BB, or if it is a loop header, the whole loop
-	if(LOOP_HEADER(bb))
+	// First check all preds are in the same region
+	for(BasicBlock::InIterator in(bb); in; in++)
 	{
-		elm::genstruct::Vector<BasicBlock*> loopBBs = getLoopBBs(bb);
-		for(elm::genstruct::Vector<BasicBlock*>::Iterator loopBB(loopBBs); loopBB; loopBB++)
-			newBBsz += loopBB->size();
-	}
-	else
-	{
-		for(BasicBlock::InIterator in(bb); in; in++)
+		if(REGION(in->source()) != r)
 		{
-			if(REGION(in->source()) != r)
-			{
-				//elm::cout << "FUNCSPLIT CANGROW: BB" << bb->number() << " does not have all parents in the same region." << elm::io::endl;
-				//elm::cout << "FUNCSPLIT CANGROW: BB" << in->source()->number() << " is in region " << REGION(in->source()) << elm::io::endl;
-				return false;
-			}
+			return false;
 		}
-
-		//elm::cout << "FUNCSPLIT CANGROW: BB" << bb->number() << " is trivial. Considering" << elm::io::endl;
-		newBBsz = bb->size();
 	}
 
-	//elm::cout << "FUNCSPLIT CANGROW: New size " << sz+newBBsz << ". Max " << REGION_SIZE << elm::io::endl;
+	// Get the size of either the BB or the loop...
+	elm::genstruct::Vector<BasicBlock*> loopBBs = getLoopBBs(bb);
+	for(elm::genstruct::Vector<BasicBlock*>::Iterator loopBB(loopBBs); loopBB; loopBB++)
+		newBBsz += loopBB->size();
 
 	if(sz + newBBsz < REGION_SIZE)
 		return true;

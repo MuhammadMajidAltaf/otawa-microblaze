@@ -2,4 +2,7 @@ let DELAYED_NONE = 0
 let DELAYED_YES = 1
 
 extend MBlaze_typeA_BRC, MBlaze_typeA_BR, MBlaze_typeB_BRC, MBlaze_typeB_BR
-	otawa_delayed = if delayed then DELAYED_YES else DELAYED_NONE endif
+	otawa_delayed = if delayed == 1 then DELAYED_YES else DELAYED_NONE endif
+
+extend MBlaze_typeB_RET
+       otawa_delayed = DELAYED_YES

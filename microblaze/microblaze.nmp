@@ -21,6 +21,9 @@ type u8  = card(8)
 type imm16 = card(16)
 type imm32 = card(32)
 
+type simm16 = int(16)
+type simm32 = int(32)
+
 type reg_num = card(5)
 
 let NUM_GPR = 32
@@ -156,6 +159,8 @@ op MBlaze_typeA = MBlaze_typeA_ALU
 op MBlaze_typeB = MBlaze_typeB_extended
                 | MBlaze_typeB_notextended
 
+//op MBlaze_typeB = MBlaze_typeB_notextended
+
 op MBlaze_typeB_inner = MBlaze_typeB_ALU
                       | MBlaze_typeB_MUL
                       | MBlaze_typeB_logic     
@@ -164,6 +169,7 @@ op MBlaze_typeB_inner = MBlaze_typeB_ALU
                       | MBlaze_typeB_BRC
                       | MBlaze_typeB_LDI
                       | MBlaze_typeB_STI
+//                      | MBlaze_typeB_IMM
 
 op MBlaze_typeB_noextend = MBlaze_typeB_BSL
                          | MBlaze_typeB_GET
@@ -173,7 +179,7 @@ op MBlaze_typeB_noextend = MBlaze_typeB_BSL
                          | MBlaze_typeB_MTS
 
 op MBlaze_typeB_extended(operation: MBlaze_typeB_inner, immHigh: imm16, immLow: imm16)
-	syntax = format("%s %d", operation.syntax, coerce(int(32), immHigh) << 16 | immLow)
+	syntax = format("%s %d", operation.syntax, coerce(card(32), coerce(card(32), immHigh) << 16 | immLow))
 	image = format("101100 00000 00000 %16b %s %16b", immHigh, operation, immLow)
 	action = 
 	{
@@ -183,7 +189,7 @@ op MBlaze_typeB_extended(operation: MBlaze_typeB_inner, immHigh: imm16, immLow: 
 	}
 
 op MBlaze_typeB_notextended(operation: MBlaze_typeB_inner, imm: imm16)
-	syntax = format("%s %d", operation.syntax, imm)
+	syntax = format("%s %d", operation.syntax, coerce(int(16), imm))
 	image = format("%s %16b", operation, imm)
 	action = 
 	{
@@ -946,6 +952,11 @@ op MBlaze_typeB_LDI(half: bit, word: bit, rD: reg_idx, rA: reg_idx0)
 			endif;
 		endif;
 	}
+
+op MBlaze_typeB_IMM()
+   syntax = "imm "
+   image = "101100 00000 00000"
+   action = {}
 
 op MBlaze_typeB_STI(half: bit, word: bit, rD: reg_idx, rA: reg_idx0)
 	syntax = format("s%s%s%si %s,%s,", 

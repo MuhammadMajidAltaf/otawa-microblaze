@@ -33,6 +33,7 @@ set(SOURCES 	hook.cpp	# sources of the plugin
 		        FunctionSplitter.cpp
 		        FunctionSplitOutput.cpp
 		        AsmDumper.cpp
+		        BBSize.cpp
 		)		
 
 
@@ -60,7 +61,7 @@ include_directories("${CMAKE_SOURCE_DIR}" ".")
 add_library(${SCRIPT} SHARED ${SOURCES})
 set_property(TARGET ${SCRIPT} PROPERTY PREFIX "")
 set_property(TARGET ${SCRIPT} PROPERTY COMPILE_FLAGS "${OTAWA_CFLAGS}")
-target_link_libraries(${SCRIPT} "${OTAWA_LDFLAGS} ${CMAKE_SOURCE_DIR}/../otawa-microblaze/microblaze.dylib")
+target_link_libraries(${SCRIPT} "${OTAWA_LDFLAGS} ${CMAKE_SOURCE_DIR}/../otawa-microblaze/microblaze.so")
 
 # installation
 if(NOT PREFIX)
